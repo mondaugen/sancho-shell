@@ -1,0 +1,4 @@
+#!/bin/bash
+$PWD/uninstall
+echo '. ~/.sanchorc' >> ~/.bashrc
+ln -s $PWD/.sanchorc ${HOME}

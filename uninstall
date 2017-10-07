@@ -1,0 +1,4 @@
+#!/bin/bash
+rm -f ~/.sanchorc
+sed -i -e '/\. ~\/\.sanchorc/ d' ~/.bashrc
+
