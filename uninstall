@@ -1,4 +1,7 @@
 #!/bin/bash
-rm -f ~/.sanchorc
-sed -i -e '/\. ~\/\.sanchorc/ d' ~/.bashrc
+rm -rf ${HOME}/.sancho
+#sed -i -e '/\. ~\/\.sancho/ d' ~/.bashrc
+sed -i -e '\,\. \${HOME}/\.sancho/\.bashrc, d' ~/.bashrc
+sed -i -e '\,\$include ~/\.sancho/\.inputrc, d' ~/.inputrc
+sed -i -e '\,source-file ~/\.sancho/\.tmux.conf, d' ~/.tmux.conf
 

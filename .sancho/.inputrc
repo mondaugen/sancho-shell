@@ -1,0 +1,4 @@
+set completion-ignore-case On
+"\er": redraw-current-line
+set print-completions-horizontally On
+set numbered-completion-display On
