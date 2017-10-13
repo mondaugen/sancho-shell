@@ -9,3 +9,5 @@ bind '"\t":menu-complete'
 # use !#^:t to refer to file part of 1st argument on current command line
 # handy for copying a file to some other dir
 
+VISUAL=vim
+alias h='history'
