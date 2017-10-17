@@ -11,3 +11,13 @@ bind '"\t":menu-complete'
 
 VISUAL=vim
 alias h='history'
+
+bind '"\C-x1":"\C-a"'
+bind '"\C-x2":"\C-a\e2\ef\eb"'
+bind '"\C-x3":"\C-a\e3\ef\eb"'
+bind '"\C-x4":"\C-a\e4\ef\eb"'
+bind '"\C-x5":"\C-a\e5\ef\eb"'
+bind '"\C-x6":"\C-a\e6\ef\eb"'
+bind '"\C-x7":"\C-a\e7\ef\eb"'
+bind '"\C-x8":"\C-a\e8\ef\eb"'
+bind '"\C-x9":"\C-a\e9\ef\eb"'
