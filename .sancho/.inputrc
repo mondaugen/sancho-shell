@@ -1,5 +1,5 @@
 set completion-ignore-case On
 "\er": redraw-current-line
 # off for now, there's a bug when using numbered-completion-display
-#set print-completions-horizontally On
+set print-completions-horizontally On
 set numbered-completion-display On
