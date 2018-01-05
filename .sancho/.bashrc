@@ -19,6 +19,7 @@ function _hist_w_jump_amt () {
 alias h='_hist_w_jump_amt'
 alias j='jobs'
 
+# Jump to nth field on command line (up to 9th field)
 bind '"\C-x1":"\C-a"'
 bind '"\C-x2":"\C-a\e2\ef\eb"'
 bind '"\C-x3":"\C-a\e3\ef\eb"'
@@ -28,3 +29,6 @@ bind '"\C-x6":"\C-a\e6\ef\eb"'
 bind '"\C-x7":"\C-a\e7\ef\eb"'
 bind '"\C-x8":"\C-a\e8\ef\eb"'
 bind '"\C-x9":"\C-a\e9\ef\eb"'
+# Put the "dirname" of the last field typed at the end of the line, useful for
+# copying files in a non-local directory
+bind '"\C-xl":"\e\C-]/\C-f\C-w\C-y\C-e \C-y"'
