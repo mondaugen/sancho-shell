@@ -18,6 +18,10 @@ function _hist_w_jump_amt () {
 }
 alias h='_hist_w_jump_amt'
 alias j='jobs'
+# Show where you are
+alias ii='printf "%s@%s:%s\n"  `whoami` `hostname` `pwd`'
+# Change the prompt to a minimal style because we have ii
+export PS1="% "
 
 # Jump to nth field on command line (up to 9th field)
 bind '"\C-x1":"\C-a"'
