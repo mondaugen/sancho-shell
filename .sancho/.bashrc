@@ -36,3 +36,5 @@ bind '"\C-x9":"\C-a\e9\ef\eb"'
 # Put the "dirname" of the last field typed at the end of the line, useful for
 # copying files in a non-local directory
 bind '"\C-xl":"\e\C-]/\C-f\C-w\C-y\C-e \C-y"'
+
+alias show_git_tree='git log --graph --all --decorate --oneline'
