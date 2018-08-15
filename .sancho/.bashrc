@@ -9,7 +9,7 @@ bind '"\t":menu-complete'
 # use !#^:t to refer to file part of 1st argument on current command line
 # handy for copying a file to some other dir
 
-VISUAL=vim
+export VISUAL=vim
 function _hist_w_jump_amt () { 
     # Remember, ^P moves through history incrementally. The distances listed are
     # from the beginning. To go back to beginning, press Meta + >.
