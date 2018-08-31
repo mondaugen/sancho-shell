@@ -13,8 +13,8 @@ export VISUAL=vim
 function _hist_w_jump_amt () { 
     # Remember, ^P moves through history incrementally. The distances listed are
     # from the beginning. To go back to beginning, press Meta + >.
-    _x="$(history|awk 'BEGIN{l=0}{l=$1;}END{print l}')";
-    history|awk "{printf \"%d\", -1 * (\$1 - "${_x}") + 1; print \$0; }"; 
+    _x="$(history|awk 'BEGIN{l=0}{l=$1;}END{print l}')"
+    history|awk "{printf \"%d\", -1 * (\$1 - "${_x}") + 1; print \$0; }"|less +G
 }
 alias h='_hist_w_jump_amt'
 alias j='jobs'
