@@ -38,3 +38,6 @@ bind '"\C-x9":"\C-a\e9\ef\eb"'
 bind '"\C-xl":"\e\C-]/\C-f\C-w\C-y\C-e \C-y"'
 
 alias show_git_tree='git log --graph --all --decorate --oneline'
+
+# cat just enough lines of a file to fill the terminal (assuming your prompt only takes up 1 line)
+alias c='head -n $(($(tput lines) - 1))'
