@@ -41,3 +41,6 @@ alias show_git_tree='git log --graph --all --decorate --oneline'
 
 # cat just enough lines of a file to fill the terminal (assuming your prompt only takes up 1 line)
 alias c='head -n $(($(tput lines) - 1))'
+
+# grep with options i always use
+alias grp='grep -rniI --exclude-dir=.git'
