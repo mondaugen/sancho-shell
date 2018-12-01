@@ -49,3 +49,5 @@ remap_capslock ()
     setxkbmap -layout us -option ctrl:nocaps
 }
 
+# grep with options i always use
+alias grp='grep -rnI --exclude-dir=.git'
