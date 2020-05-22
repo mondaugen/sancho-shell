@@ -51,3 +51,6 @@ remap_capslock ()
 
 # grep with options i always use
 alias grp='grep -rnI --exclude-dir=.git'
+
+# virtualenv that includes the basename of the current directory in the prompt
+alias virtualenv="virtualenv --prompt '"'(\W/`basename "$VIRTUAL_ENV"`)'"'"
