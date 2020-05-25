@@ -54,3 +54,6 @@ alias grp='grep -rnI --exclude-dir=.git'
 
 # virtualenv that includes the basename of the current directory in the prompt
 alias virtualenv="virtualenv --prompt '"'(\W/`basename "$VIRTUAL_ENV"`)'"'"
+
+# turn off CTRL-S
+stty -ixon
