@@ -57,3 +57,9 @@ alias virtualenv='virtualenv --prompt '\''(`basename $PWD`/`basename "$VIRTUAL_E
 
 # turn off CTRL-S
 stty -ixon
+
+# list all untracked files in git
+alias git_list_untracked='git ls-files --others --exclude-standard'
+
+# list changed (tracked) files in git
+alias git_list_changed='git diff --name-only'
