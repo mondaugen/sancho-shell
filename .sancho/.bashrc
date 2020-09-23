@@ -10,7 +10,7 @@ bind '"\t":menu-complete'
 # handy for copying a file to some other dir
 
 export VISUAL=vim
-function _hist_w_jump_amt () { 
+function _hist_w_jump_amt () {
     # Remember, ^P moves through history incrementally. The distances listed are
     # from the beginning. To go back to beginning, press Meta + >.
     _x="$(history|awk 'BEGIN{l=0}{l=$1;}END{print l}')"
@@ -50,7 +50,7 @@ remap_capslock ()
 }
 
 # grep with options i always use
-alias grp='grep -rnI --exclude-dir=.git'
+alias grp='grep --color=always -rnI --exclude-dir=.git'
 
 # virtualenv that includes the basename of the current directory in the prompt
 alias virtualenv='virtualenv --prompt '\''(`basename $PWD`/`basename "$VIRTUAL_ENV"`)'\'''
