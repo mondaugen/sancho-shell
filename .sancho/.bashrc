@@ -63,3 +63,14 @@ alias git_list_untracked='git ls-files --others --exclude-standard'
 
 # list changed (tracked) files in git
 alias git_list_changed='git diff --name-only'
+
+# list files that changed by more than just whitespace changes
+# takes argument referring to branch or commit
+git_list_nonws_changes ()
+{
+    git diff --name-only "$1" | \
+    xargs -d'\n' -I{} bash -c '
+        d="$(git diff -b '"$1"' -- {} |wc -l)";
+        [[ $d -gt 0 ]] && echo "{}"
+    '
+}
