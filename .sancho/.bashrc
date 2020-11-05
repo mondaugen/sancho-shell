@@ -74,3 +74,14 @@ git_list_nonws_changes ()
         [[ $d -gt 0 ]] && echo "{}"
     '
 }
+
+# list files where only the whitespace changed
+# takes argument referring to branch or commit
+git_list_ws_changes ()
+{
+    git diff --name-only "$1" | \
+    xargs -d'\n' -I{} bash -c '
+        d="$(git diff -b '"$1"' -- {} |wc -l)";
+        [[ $d -eq 0 ]] && echo "{}"
+    '
+}
