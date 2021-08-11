@@ -85,3 +85,23 @@ git_list_ws_changes ()
         [[ $d -eq 0 ]] && echo "{}"
     '
 }
+
+# Searches up for the regex PATTERN that has INDENT less indent above the line
+# number LN in the file FILE
+find_containing_thing ()
+{
+    [ -z $LN ] && LN=1
+    [ -z $FILE ] && FILE="/tmp/test"
+    [ -z $INDENT ] && INDENT=4
+    [ -z $PATTERN ] && PATTERN="class"
+    line="$(head -n $LN $FILE |tail -n 1)"
+    nws="$(echo "$line"|sed 's/\(^ *\).*$/\1/'|wc -m)"
+    nws=$(( $nws - 1 - $INDENT ))
+    lines_w_numbers () {
+        head -n $LN $FILE | perl -p -e '$_="$.$_";'
+    }
+    lines_w_numbers | \
+        tac | \
+        perl -ne 'BEGIN { $matcher=(" "x'$nws')."'$PATTERN'"; }' \
+            -e 'print $_ if s/(^[0-9]+)($matcher.*$)/$1:$2/' |head -n 1
+}
