@@ -106,3 +106,25 @@ find_containing_thing ()
         perl -ne 'BEGIN { $matcher=(" "x'$nws')."'$PATTERN'"; }' \
             -e 'print $_ if s/(^[0-9]+)($matcher.*$)/$1:$2/' |head -n 1
 }
+
+
+# Takes a video in $1 and slows it down by amount in $2. So watch out, to speed
+# up a video by 2, you pass 0.5 for $2.  If $3 not specified, the output is the
+# input with the file ending stripped off, appended with -slowed-$2.gif (so the
+# default output format is gif)
+slow_down_video ()
+{
+    USAGE="args are path-to-video rate [output-path]"
+    if [[ -z "$1" ]] || [[ -z "$2" ]]
+    then
+        echo "$USAGE"
+        return
+    fi
+    OUTPUT_PATH="${1%.*}-slowed-$2.gif"
+    if [[ -n "$3" ]]
+    then
+        OUTPUT_PATH="$3"
+    fi
+    ffmpeg -i "$1" -filter:v "setpts=$2*PTS" "$OUTPUT_PATH" && echo "Wrote to:
+$OUTPUT_PATH"
+}
