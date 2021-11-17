@@ -128,3 +128,13 @@ slow_down_video ()
     ffmpeg -i "$1" -filter:v "setpts=$2*PTS" "$OUTPUT_PATH" && echo "Wrote to:
 $OUTPUT_PATH"
 }
+
+show_git_fork ()
+{
+    OTHERBRANCH=master
+    if [[ -n "$1" ]]; then
+        OTHERBRANCH="$1"
+    fi
+    git merge-base HEAD "$OTHERBRANCH"
+}
+        
