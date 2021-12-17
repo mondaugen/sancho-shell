@@ -49,15 +49,18 @@ make_tmux_menu ()
 {
     # take a list of files, separated by newlines, on stdin
     # interleave them with a key to select that menu item and a command to run that will insert it
+    cheight=$(tmux display-message -p '#{client_height}')
     wlen=$(word_length_under_cursor $1 $2)
     x=$(complete_path_under_cursor $1 $2 | python3 -c '
 import sys
 import string
 keys=string.digits[1:]+string.ascii_letters.replace("q","").replace("Q","")
-lines=sys.stdin.readlines()
 wlen=int(sys.argv[1])
+cheight=int(sys.argv[2])-2 # - 2 to allow menu border
+lines=sys.stdin.readlines()
+lines=lines[:min(len(lines),cheight)]
 print("tmux display-menu "+" ".join([f"{line.strip()} {key} \"send-keys -N {wlen}  ; send-keys {line.strip()}\"" for line,key in zip(lines,keys)]))
-' $wlen)
+' $wlen $cheight)
     eval "$x"
 }
 
