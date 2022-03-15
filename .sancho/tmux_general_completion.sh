@@ -21,12 +21,8 @@ print(word)' $1 $2
 # The argument is a string (or regular expression) that will match anywhere in
 # path names tracked by git
 generate_path_matches ()
-{
-    lsfiles='git ls-files -co' #| grep
-    if [ -a .gitignore ]; then
-        lsfiles="${lsfiles}X .gitignore"
-    fi
-    $lsfiles |grep "$1"
+{   
+    git grep --recurse-submodules -l -I -n -r -e '.*' | grep "$1"
 }
 
 complete_path_under_cursor ()
