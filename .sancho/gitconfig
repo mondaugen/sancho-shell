@@ -1,0 +1,6 @@
+[alias]
+	co = checkout
+	b = branch
+	c = commit
+	s = status
+	cl = clone --recurse-submodules

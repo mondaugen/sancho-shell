@@ -1,5 +1,7 @@
 from tmux_display_menu_formatter import interleave_commands
 import sys
+import re
+rexp=re.compile('\s+')
 
 def gen_cmd(line,key):
     path, lnum = line.split(":")[:2]
@@ -11,4 +13,5 @@ def fmt_line(line):
 
 cheight=int(sys.argv[1])-2 # - 2 to allow menu border
 lines=[line.replace(';','\;').strip() for line in sys.stdin.readlines()]
+lines=[rexp.sub(' ',line) for line in lines]
 print(interleave_commands(lines,fmt_line,gen_cmd,cheight=cheight))

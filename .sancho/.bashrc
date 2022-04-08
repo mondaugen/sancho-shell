@@ -69,6 +69,9 @@ alias git_list_untracked='git ls-files --others --exclude-standard'
 # list changed (tracked) files in git
 alias git_list_changed='git diff --name-only'
 
+# shortcut for git grep
+alias ggrp='git grep --recurse-submodules -I -n -r'
+
 # revert staged
 git_rev ()
 {

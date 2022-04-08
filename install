@@ -4,3 +4,6 @@ ln -s $PWD/.sancho ${HOME}/
 echo '. ${HOME}/.sancho/.bashrc' >> ~/.bashrc
 echo '$include ~/.sancho/.inputrc' >> ~/.inputrc
 echo 'source-file ~/.sancho/.tmux.conf' >> ~/.tmux.conf
+echo '[include]
+    path = ~/.sancho/gitconfig
+' >> ~/.gitconfig
