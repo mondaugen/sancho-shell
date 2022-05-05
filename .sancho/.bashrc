@@ -1,3 +1,6 @@
+# check to see if we're on ubuntu
+ON_UBUNTU=$(uname --all|grep 'Ubuntu')
+
 # enable menu completion to quicky choose completion entries
 # these seem to be bound by default to do lowercase version
 bind -r "\C-xn"
@@ -151,4 +154,7 @@ show_git_fork ()
     fi
     git merge-base HEAD "$OTHERBRANCH"
 }
-        
+
+if [[ -n "$ON_UBUNTU" ]]; then
+    alias f='nautilus'
+fi

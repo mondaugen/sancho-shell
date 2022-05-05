@@ -4,3 +4,5 @@
 	c = commit
 	s = status
 	cl = clone --recurse-submodules
+	d = diff
+	rs = restore --staged
