@@ -155,6 +155,16 @@ show_git_fork ()
     git merge-base HEAD "$OTHERBRANCH"
 }
 
+# argument is branch to do diff against
+git_diff_b_name_only ()
+{
+    git diff --name-only -b "$1" | \
+        xargs -d'\n' -I{} bash -c '
+d=$(git diff -b '"$1"' -- "{}"|wc -l);
+if [[ $d -ne 0 ]]; then echo "{}"; fi
+'
+}
+
 if [[ -n "$ON_UBUNTU" ]]; then
     alias f='nautilus'
 fi
