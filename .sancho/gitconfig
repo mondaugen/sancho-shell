@@ -7,3 +7,4 @@
 	d = diff
 	rs = restore --staged
 	tree = log --graph --all --decorate --oneline
+	difc = diff --color
