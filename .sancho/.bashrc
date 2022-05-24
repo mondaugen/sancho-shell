@@ -165,6 +165,13 @@ if [[ $d -ne 0 ]]; then echo "{}"; fi
 '
 }
 
+# run git diff through external less, that way previous terminal lines don't get
+# pushed up so far
+git_difc ()
+{
+    git difc "$@" | less -R
+}
+
 if [[ -n "$ON_UBUNTU" ]]; then
     alias f='nautilus'
 fi
