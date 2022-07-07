@@ -50,12 +50,17 @@ make_tmux_menu ()
     x=$(complete_path_under_cursor $1 $2 | python3 -c '
 import sys
 import string
-keys=string.digits[1:]+string.ascii_letters.replace("q","").replace("Q","")
+# remove q so we can quit the menu, j and k so we can scroll like vim
+keys=string.digits[1:]+string.ascii_letters.replace("q","").replace("Q","").replace("j","").replace("k","")
 wlen=int(sys.argv[1])
 cheight=int(sys.argv[2])-2 # - 2 to allow menu border
-lines=sys.stdin.readlines()
+lines=[l.replace(" ","\ ") for l in sys.stdin.readlines()]
+if len(lines) == 0:
+    sys.exit(1)
 lines=lines[:min(len(lines),cheight)]
-print("tmux display-menu "+" ".join([f"{line.strip()} {key} \"send-keys -N {wlen}  ; send-keys {line.strip()}\"" for line,key in zip(lines,keys)]))
+def escape_space(s):
+    return s.replace(" ","\\\\ Space ")
+print("tmux display-menu "+" ".join([f"{line.strip()} {key} \"send-keys -N {wlen}  ; send-keys {escape_space(line.strip())}\"" for line,key in zip(lines,keys)]))
 ' $wlen $cheight)
     eval "$x"
 }
