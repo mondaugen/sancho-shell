@@ -46,6 +46,7 @@ make_tmux_menu ()
     # take a list of files, separated by newlines, on stdin
     # interleave them with a key to select that menu item and a command to run that will insert it
     cheight=$(tmux display-message -p '#{client_height}')
+    cwidth=$(tmux display-message -p '#{client_width}')
     wlen=$(word_length_under_cursor $1 $2)
     x=$(complete_path_under_cursor $1 $2 | python3 -c '
 import sys
@@ -54,14 +55,17 @@ import string
 keys=string.digits[1:]+string.ascii_letters.replace("q","").replace("Q","").replace("j","").replace("k","")
 wlen=int(sys.argv[1])
 cheight=int(sys.argv[2])-2 # - 2 to allow menu border
+cwidth=int(sys.argv[3])-22 # - 2 to allow menu border
 lines=[l.replace(" ","\ ") for l in sys.stdin.readlines()]
 if len(lines) == 0:
     sys.exit(1)
 lines=lines[:min(len(lines),cheight)]
+lines=list(filter(lambda l: len(l.strip()) <= cwidth,lines))
 def escape_space(s):
     return s.replace(" ","\\\\ Space ")
-print("tmux display-menu "+" ".join([f"{line.strip()} {key} \"send-keys -N {wlen}  ; send-keys {escape_space(line.strip())}\"" for line,key in zip(lines,keys)]))
-' $wlen $cheight)
+tmux_cmd="tmux display-menu "+" ".join([f"{line.strip()} {key} \"send-keys -N {wlen}  ; send-keys {escape_space(line.strip())}\"" for line,key in zip(lines,keys)])
+print(tmux_cmd)
+' $wlen $cheight $cwidth)
     eval "$x"
 }
 
