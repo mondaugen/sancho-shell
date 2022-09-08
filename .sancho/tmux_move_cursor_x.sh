@@ -7,4 +7,6 @@
 # first move to beginning of line
 tmux send-keys $MOVE_TO_LINE_BEGIN
 # then move right $1 times
-tmux send-keys -N $1 $MOVE_RIGHT
+if [[ $1 -gt 0 ]]; then
+    tmux send-keys -N $1 $MOVE_RIGHT
+fi
