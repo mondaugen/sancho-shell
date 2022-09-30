@@ -56,8 +56,10 @@ remap_capslock ()
     setxkbmap -layout us -option ctrl:nocaps
 }
 
+# directories that are exluded in custom grep and find
+EXCLUDED_DIRS=(.git venv)
 # grep with options i always use
-GRP_EXCLUDE='--exclude-dir=.git --exclude-dir=venv'
+GRP_EXCLUDE="${EXCLUDED_DIRS[@]/#/--exclude-dir=}"
 alias grp='grep -rnI '"$GRP_EXCLUDE"
 alias grpc='grep --color=always -rnI '"$GRP_EXCLUDE"
 
