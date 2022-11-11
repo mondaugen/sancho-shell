@@ -1,0 +1,4 @@
+# Some terminal escape codes for exploration
+
+export BG_RED="\033[48;5;196m"
+export RESET="\033[0m"
