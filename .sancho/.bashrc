@@ -61,7 +61,10 @@ EXCLUDED_DIRS=(.git venv)
 # grep with options i always use
 GRP_EXCLUDE="${EXCLUDED_DIRS[@]/#/--exclude-dir=}"
 alias grp='grep -rnI '"$GRP_EXCLUDE"
-alias grpc='grep --color=always -rnI '"$GRP_EXCLUDE"
+grpc ()
+{
+    grep --color=always -rnI "$GRP_EXCLUDE" "$@" | less -R
+}
 
 # virtualenv that includes the basename of the current directory in the prompt
 alias virtualenv='virtualenv --prompt '\''(`basename $PWD`/`basename "$VIRTUAL_ENV"`)'\'''
