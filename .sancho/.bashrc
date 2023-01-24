@@ -178,6 +178,16 @@ git_difc ()
     git difc "$@" | less -R
 }
 
+midi_to_freq ()
+{
+    python3 -c "print(440.*(2.**(($1-69.)/12.)))"
+}
+
+freq_to_midi ()
+{
+    python3 -c "import math; print(math.log2($1/440.)*12.+69.)"
+}
+
 if [[ -n "$ON_UBUNTU" ]]; then
     alias f='nautilus'
 fi
