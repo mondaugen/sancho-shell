@@ -188,6 +188,17 @@ freq_to_midi ()
     python3 -c "import math; print(math.log2($1/440.)*12.+69.)"
 }
 
+count_some_seconds ()
+{
+    CURTIME=$(date +%s);
+    [ -z $1 ] && COUNTTIME=10 || COUNTTIME=$1
+    while [[ $(date +%s) < $(($CURTIME + $COUNTTIME)) ]]
+    do
+        echo -ne "\x1b[2K\x1b[1G" && echo -n "$(date +%s)" && sleep 0.1
+    done
+    echo
+}
+
 if [[ -n "$ON_UBUNTU" ]]; then
     alias f='nautilus'
 fi
