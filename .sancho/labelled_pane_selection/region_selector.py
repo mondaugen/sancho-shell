@@ -2,12 +2,13 @@ import sys
 import os
 import re
 
+MODE=os.environ.get("MODE","display")
 NEWLINE=os.environ.get("NEWLINE","\n")
 FORLANG=os.environ.get("FORLANG","python")
 SELECTION_CHARS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 if FORLANG == "python":
     WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
-    COMMENTS_MATCHER=re.compile('(?m)""".*"""|#.*$')
+    COMMENTS_MATCHER=re.compile('"""(.|\n)*?"""|#.*\n')
 if FORLANG == "c":
     WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
     COMMENTS_MATCHER=re.compile('(?m)/\*.*\*/|//.*$')
@@ -60,7 +61,6 @@ def label_matches(text,matcher,labels,maxwidth):
     for m in list(matcher.finditer(text))[::-1]:
         loc_in_line=m.end() - m.string.rfind(b'\n',0,m.end())
         if loc_in_line < maxwidth:
-            print("loc_in_line: ",loc_in_line,"val: ",m.string[m.end()])
             try:
                 selectors[next(iter_labels)]=m
             except StopIteration:
@@ -85,7 +85,7 @@ class TextRect:
         self.maxwidth=maxwidth
         self.maxheight=maxheight
 
-    def prompt_select(self,outfile,matcher,labelling='after'):
+    def prompt_select(self,outfile,matcher,labelling='after',mode='display'):
         # find all word matches
         # generate text where words are surrounded by escape sequences that
         # highlight them and also words are labelled by a character that is
@@ -97,10 +97,23 @@ class TextRect:
             SELECTION_CHARS,
             self.maxwidth
         )
-        outfile.write(label_text(bytes(self.text,encoding='utf-8'),selectors))
+        if mode == 'display':
+            outfile.write(label_text(bytes(self.text,encoding='utf-8'),selectors))
+        if mode == 'select':
+            selected_label=sys.stdin.read(1)
+            m=selectors[selected_label]
+            outfile.write(bytes(m.string[m.start():m.end()]))
 
 MW=int(os.environ['MW'])
 MH=int(os.environ['MH'])
-OUTFILE=os.environ.get('OUTFILE','/tmp/a')
-with open(OUTFILE,'wb') as fd:
-    TextRect(sys.stdin.read(),MW,MH).prompt_select(fd,WORD_MATCHER)
+INFILE=os.environ.get('INFILE','/tmp/a')
+OUTFILE=os.environ.get('OUTFILE','/tmp/b')
+
+if MODE == "display":
+    with open(INFILE,'r') as fda:
+        with open(OUTFILE,'wb') as fdb:
+            TextRect(fda.read(),MW,MH).prompt_select(fdb,WORD_MATCHER)
+if MODE == "select":
+    with open(INFILE,'r') as fda:
+        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode='select')
+    
