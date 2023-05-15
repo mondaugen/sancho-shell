@@ -3,9 +3,14 @@ import os
 import re
 
 NEWLINE=os.environ.get("NEWLINE","\n")
+FORLANG=os.environ.get("FORLANG","python")
 SELECTION_CHARS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
-COMMENTS_MATCHER=re.compile('(?m)""".*"""|#.*$')
+if FORLANG == "python":
+    WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
+    COMMENTS_MATCHER=re.compile('(?m)""".*"""|#.*$')
+if FORLANG == "c":
+    WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
+    COMMENTS_MATCHER=re.compile('(?m)/\*.*\*/|//.*$')
 COMMENT_CONTENTS=re.compile('\S')
 
 def comment_repl(m):
