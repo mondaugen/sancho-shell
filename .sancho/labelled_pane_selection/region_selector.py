@@ -8,7 +8,7 @@ FORLANG=os.environ.get("FORLANG","python")
 SELECTION_CHARS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 if FORLANG == "python":
     WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
-    COMMENTS_MATCHER=re.compile('"""(.|\n)*?"""|#.*\n')
+    COMMENTS_MATCHER=re.compile('"""(.|\n)*?"""|#.*\n|"""(.|\n)*$')
 if FORLANG == "c":
     WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
     COMMENTS_MATCHER=re.compile('(?m)/\*.*\*/|//.*$')
