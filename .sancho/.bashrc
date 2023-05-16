@@ -199,6 +199,13 @@ count_some_seconds ()
     echo
 }
 
+common_words ()
+{
+    python3 "${HOME}/.sancho/line_union.py" \
+        <(python3 "${HOME}/.sancho/file_words.py" < "$1") \
+        <(python3 "${HOME}/.sancho/file_words.py" < "$2")
+}
+
 if [[ -n "$ON_UBUNTU" ]]; then
     alias f='nautilus'
 fi
