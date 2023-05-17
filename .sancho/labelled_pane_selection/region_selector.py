@@ -6,16 +6,35 @@ MODE=os.environ.get("MODE","display")
 NEWLINE=os.environ.get("NEWLINE","\n")
 FORLANG=os.environ.get("FORLANG","python")
 SELECTION_CHARS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+class RevComment:
+    def __init__(self,pat='"""(.|\n)*?"""|""".(.|\n)*?$'):
+        self.pat=re.compile(pat)
+    def sub(self,repl,s):
+        ret = self.pat.sub(repl,s[::-1])[::-1]
+        return ret
+
+# I think to do this properly you need to have an object that implements sub for each matcher
+# The sub function will put back the comment delimiters and just replace the comment contents
+
 if FORLANG == "python":
     WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
-    COMMENTS_MATCHER=re.compile('"""(.|\n)*?"""|#.*\n|"""(.|\n)*$')
+    COMMENTS_MATCHERS=[
+    re.compile('"""(.|\n)*?"""|#.*\n|""".(.|\n)*?$'),
+    RevComment(),
+    ]
 if FORLANG == "c":
     WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
-    COMMENTS_MATCHER=re.compile('(?m)/\*.*\*/|//.*$')
+    COMMENTS_MATCHERS=[re.compile('(?m)/\*.*\*/|//.*$')]
 COMMENT_CONTENTS=re.compile('\S')
 
 def comment_repl(m):
     return COMMENT_CONTENTS.sub(' ',m.group())
+
+def apply_comments_matchers(s):
+    for m in COMMENTS_MATCHERS:
+        s = m.sub(comment_repl,s)
+    return s
 
 class ESCAPES:
     WHITE_BOLD=b'\033[1m'
@@ -92,7 +111,7 @@ class TextRect:
         # later used to select the word selection then once the word has been
         # selected it is written to the file supplied as an argument
         selectors=label_matches(
-            bytes(COMMENTS_MATCHER.sub(comment_repl,self.text),encoding='utf-8'),
+            bytes(apply_comments_matchers(self.text),encoding='utf-8'),
             matcher,
             SELECTION_CHARS,
             self.maxwidth
