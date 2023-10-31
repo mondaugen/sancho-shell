@@ -206,6 +206,15 @@ common_words ()
         <(python3 "${HOME}/.sancho/file_words.py" < "$2")
 }
 
+interleave_debug ()
+{
+    funfun="debug"
+    if [[ -n "$1" ]]; then
+        funfun="$1"
+    fi
+    awk 'BEGIN{x=0}{printf("echo -ne '"'"'"); printf("'"$funfun"'(\"%d\\\\n\");",x); print($0); printf("'"'"'\n"); x++}' | bash
+}
+
 if [[ -n "$ON_UBUNTU" ]]; then
     alias f='nautilus'
 fi
