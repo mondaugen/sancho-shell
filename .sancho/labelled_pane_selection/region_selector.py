@@ -1,11 +1,13 @@
 import sys
 import os
 import re
+import string
 
 MODE=os.environ.get("MODE","display")
 NEWLINE=os.environ.get("NEWLINE","\n")
-FORLANG=os.environ.get("FORLANG","python")
-SELECTION_CHARS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+FORLANG=os.environ.get("FORLANG")
+SELECTION_CHARS="0123456789abcdefghijklmorstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+LOOPS=int(os.environ.get("LOOPS","1"))
 
 class RevComment:
     def __init__(self,pat='"""(.|\n)*?"""|""".(.|\n)*?$'):
@@ -17,6 +19,7 @@ class RevComment:
 # I think to do this properly you need to have an object that implements sub for each matcher
 # The sub function will put back the comment delimiters and just replace the comment contents
 
+WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
 if FORLANG == "python":
     WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
     COMMENTS_MATCHERS=[
@@ -59,6 +62,20 @@ def padline(s,w,pad=" "):
     padding = pad * max(0,w-l)
     return (stub + padding)[:w] + NEWLINE
 
+def text_mask_single_delim(text,delim="'"):
+    pol=1
+    val=0
+    result=[0]*len(text)
+    for i,c in enumerate(text):
+        if c == delim:
+            val += pol
+            pol *= -1
+        result[i]=val
+    return result
+
+def apply_text_mask(text,mask,sub=" "):
+    return "".join([sub if m != 0 and t not in string.whitespace else t for t,m in zip(text,mask)])
+
 class Edit:
     """ a data structure that describes a text insertion or replacement """
     def __init__(self,anchor,text,skip=0):
@@ -74,7 +91,12 @@ def do_edits(s,edits):
         offset += len(e.text) - e.skip
     return s
 
-def label_matches(text,matcher,labels,maxwidth):
+def label_matches(text,matcher,labels,maxwidth,loops):
+    # if loops is 1 it will iterate through iter_labels once
+    # if loops is 2 it will iterate through iter_labels twice, but only keep the
+    # label locations from the second loop
+    # this allows you to label chunks of text where there would be more matches
+    # than labels, by discarding earlier chunks
     selectors=dict()
     iter_labels=iter(labels)
     for m in list(matcher.finditer(text))[::-1]:
@@ -83,7 +105,11 @@ def label_matches(text,matcher,labels,maxwidth):
             try:
                 selectors[next(iter_labels)]=m
             except StopIteration:
-                break
+                loops -= 1
+                if loops > 0:
+                    iter_labels=iter(labels)
+                else:
+                    break
     return selectors
 
 def label_text(text,selectors):
@@ -104,24 +130,32 @@ class TextRect:
         self.maxwidth=maxwidth
         self.maxheight=maxheight
 
-    def prompt_select(self,outfile,matcher,labelling='after',mode='display'):
+    def prompt_select(self,outfile,matcher,labelling='after',mode='display',loops=1):
         # find all word matches
         # generate text where words are surrounded by escape sequences that
         # highlight them and also words are labelled by a character that is
         # later used to select the word selection then once the word has been
         # selected it is written to the file supplied as an argument
         selectors=label_matches(
-            bytes(apply_comments_matchers(self.text),encoding='utf-8'),
+            bytes(apply_text_mask(self.text,text_mask_single_delim(self.text)),encoding='utf-8'),
             matcher,
             SELECTION_CHARS,
-            self.maxwidth
+            self.maxwidth,
+            loops
         )
         if mode == 'display':
             outfile.write(label_text(bytes(self.text,encoding='utf-8'),selectors))
         if mode == 'select':
             selected_label=sys.stdin.read(1)
+            if selected_label == 'n':
+                sys.exit(1)
+            if selected_label == 'p':
+                sys.exit(2)
+            if selected_label == 'q':
+                sys.exit(3)
             m=selectors[selected_label]
             outfile.write(bytes(m.string[m.start():m.end()]))
+            sys.exit(0)
 
 MW=int(os.environ['MW'])
 MH=int(os.environ['MH'])
@@ -131,8 +165,8 @@ OUTFILE=os.environ.get('OUTFILE','/tmp/b')
 if MODE == "display":
     with open(INFILE,'r') as fda:
         with open(OUTFILE,'wb') as fdb:
-            TextRect(fda.read(),MW,MH).prompt_select(fdb,WORD_MATCHER)
+            TextRect(fda.read(),MW,MH).prompt_select(fdb,WORD_MATCHER,loops=LOOPS)
 if MODE == "select":
     with open(INFILE,'r') as fda:
-        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode='select')
+        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode='select',loops=LOOPS)
     
