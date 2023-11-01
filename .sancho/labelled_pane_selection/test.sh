@@ -3,15 +3,20 @@ LOOPS=1
 [ -z $TARGET_PANE ] && TARGET_PANE=11
 do_capture ()
 {
-    tmux capture-pane -pt$TARGET_PANE > /tmp/a && \
-    python3 .sancho/labelled_pane_selection/region_selector.py && \
-    cat /tmp/b | \
-    head -n $(($(tput lines) - 0)) | \
-    tail -n $(($(tput lines) - 0))| \
-    head --bytes=-1 && \
-    read -sn 1 tempy && \
-    echo "$tempy" | \
-    MODE=select python3 .sancho/labelled_pane_selection/region_selector.py > /tmp/c
+    echo "$LOOPS" >> /tmp/loops
+    tmux capture-pane -pt$TARGET_PANE > /tmp/a
+    rm -f /tmp/d
+    tmux neww -eLOOPS=$LOOPS -eMW=$MW -eMH=$MH 'tmux set-option -w remain-on-exit off && python3 .sancho/labelled_pane_selection/region_selector.py && cat /tmp/b | head -n $(($(tput lines) - 0)) | tail -n $(($(tput lines) - 0))| head --bytes=-1 && read -sn 1 tempy && echo -n "$tempy" > /tmp/d'
+    # wait for /tmp/d to show up because it seems tmux neww is asynchronous
+    while [ 1 ]
+    do
+        if [ -f /tmp/d ]
+        then
+            break
+        fi
+        sleep 0.1
+    done
+    cat /tmp/d | MODE=select python3 .sancho/labelled_pane_selection/region_selector.py > /tmp/c
     case $? in
         0)
             tmux load-buffer /tmp/c && echo
@@ -23,7 +28,7 @@ do_capture ()
             LOOPS=$(( $LOOPS - 1 )) do_capture
             ;;
         *)
-            echo # don't store any string
+            echo "got error $?" && exit $? # don't store any string
             ;;
     esac
 
