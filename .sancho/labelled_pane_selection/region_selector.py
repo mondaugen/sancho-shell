@@ -73,6 +73,9 @@ def text_mask_single_delim(text,delim="'"):
         result[i]=val
     return result
 
+def id_text_mask(text):
+    return [0]*len(text)
+
 def apply_text_mask(text,mask,sub=" "):
     return "".join([sub if m != 0 and t not in string.whitespace else t for t,m in zip(text,mask)])
 
@@ -130,14 +133,14 @@ class TextRect:
         self.maxwidth=maxwidth
         self.maxheight=maxheight
 
-    def prompt_select(self,outfile,matcher,labelling='after',mode='display',loops=1):
+    def prompt_select(self,outfile,matcher,labelling='after',mode='display',loops=1,text_mask=id_text_mask):
         # find all word matches
         # generate text where words are surrounded by escape sequences that
         # highlight them and also words are labelled by a character that is
         # later used to select the word selection then once the word has been
         # selected it is written to the file supplied as an argument
         selectors=label_matches(
-            bytes(apply_text_mask(self.text,text_mask_single_delim(self.text)),encoding='utf-8'),
+            bytes(apply_text_mask(self.text,text_mask(self.text)),encoding='utf-8'),
             matcher,
             SELECTION_CHARS,
             self.maxwidth,
