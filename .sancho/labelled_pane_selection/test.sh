@@ -6,7 +6,7 @@ do_capture ()
     echo "$LOOPS" >> /tmp/loops
     tmux capture-pane -pt$TARGET_PANE > /tmp/a
     rm -f /tmp/d
-    tmux neww -eLOOPS=$LOOPS -eMW=$MW -eMH=$MH 'tmux set-option -w remain-on-exit off && python3 .sancho/labelled_pane_selection/region_selector.py && cat /tmp/b | head -n $(($(tput lines) - 0)) | tail -n $(($(tput lines) - 0))| head --bytes=-1 && read -sn 1 tempy && echo -n "$tempy" > /tmp/d'
+    tmux neww -eLOOPS=$LOOPS -eMW=$MW -eMH=$MH -eMATCHER_STYLE=$MATCHER_STYLE 'tmux set-option -w remain-on-exit off && python3 .sancho/labelled_pane_selection/region_selector.py && cat /tmp/b | head -n $(($(tput lines) - 0)) | tail -n $(($(tput lines) - 0))| head --bytes=-1 && read -sn 1 tempy && echo -n "$tempy" > /tmp/d'
     # wait for /tmp/d to show up because it seems tmux neww is asynchronous
     while [ 1 ]
     do

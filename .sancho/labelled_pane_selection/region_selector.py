@@ -5,7 +5,7 @@ import string
 
 MODE=os.environ.get("MODE","display")
 NEWLINE=os.environ.get("NEWLINE","\n")
-FORLANG=os.environ.get("FORLANG")
+MATCHER_STYLE=os.environ.get("MATCHER_STYLE","word")
 SELECTION_CHARS="0123456789abcdefghijklmorstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 LOOPS=int(os.environ.get("LOOPS","1"))
 
@@ -19,16 +19,11 @@ class RevComment:
 # I think to do this properly you need to have an object that implements sub for each matcher
 # The sub function will put back the comment delimiters and just replace the comment contents
 
+#if MATCHER_STYLE == "words"
 WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
-if FORLANG == "python":
-    WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
-    COMMENTS_MATCHERS=[
-    re.compile('"""(.|\n)*?"""|#.*\n|""".(.|\n)*?$'),
-    RevComment(),
-    ]
-if FORLANG == "c":
-    WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
-    COMMENTS_MATCHERS=[re.compile('(?m)/\*.*\*/|//.*$')]
+if MATCHER_STYLE == "line":
+    WORD_MATCHER=re.compile(b'^.*$')
+
 COMMENT_CONTENTS=re.compile('\S')
 
 def comment_repl(m):
