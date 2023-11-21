@@ -19,12 +19,22 @@ class RevComment:
 # I think to do this properly you need to have an object that implements sub for each matcher
 # The sub function will put back the comment delimiters and just replace the comment contents
 
+def id_post_proc(s):
+    return s
+
+def strip_post_proc(s):
+    return s.strip()
+
 #if MATCHER_STYLE == "words"
-WORD_MATCHER = re.compile(b'\\b[a-zA-Z_]+\\b')
+WORD_MATCHER = {"re":re.compile(b'\\b[a-zA-Z_]+\\b'),"group":0}
+WORD_POST_PROC = id_post_proc
 if MATCHER_STYLE == "line":
-    WORD_MATCHER=re.compile(b'^.*$')
+    WORD_MATCHER={"re":re.compile(b'\n?([^\n]+)'),"group":1}
+    #WORD_POST_PROC = strip_post_proc # the group strips it for you
 
 COMMENT_CONTENTS=re.compile('\S')
+
+## process string before it is copied to clipboard
 
 def comment_repl(m):
     return COMMENT_CONTENTS.sub(' ',m.group())
@@ -97,11 +107,13 @@ def label_matches(text,matcher,labels,maxwidth,loops):
     # than labels, by discarding earlier chunks
     selectors=dict()
     iter_labels=iter(labels)
-    for m in list(matcher.finditer(text))[::-1]:
-        loc_in_line=m.end() - m.string.rfind(b'\n',0,m.end())
+    mre=matcher['re']
+    mgrp=matcher['group']
+    for m in list(mre.finditer(text))[::-1]:
+        loc_in_line=m.end(mgrp) - m.string.rfind(b'\n',0,m.end(mgrp))
         if loc_in_line < maxwidth:
             try:
-                selectors[next(iter_labels)]=m
+                selectors[next(iter_labels)]=(m,mgrp)
             except StopIteration:
                 loops -= 1
                 if loops > 0:
@@ -111,10 +123,10 @@ def label_matches(text,matcher,labels,maxwidth,loops):
     return selectors
 
 def label_text(text,selectors):
-    starts=[Edit(m.start(),ESCAPES.GREEN) for _,m in selectors.items()]
-    ends=[Edit(m.end(),ESCAPES.RESET) for _,m in selectors.items()]
-    labels=[Edit(m.end(),ESCAPES.WHITE_BOLD+bytes(k,encoding='utf-8')+ESCAPES.RESET,
-            skip=0 if m.string[m.end()] == ord(b'\n') else 1) for k,m in selectors.items()]
+    starts=[Edit(m.start(g),ESCAPES.GREEN) for _,(m,g) in selectors.items()]
+    ends=[Edit(m.end(g),ESCAPES.RESET) for _,(m,g) in selectors.items()]
+    labels=[Edit(m.end(g),ESCAPES.WHITE_BOLD+bytes(k,encoding='utf-8')+ESCAPES.RESET,
+            skip=0 if m.string[m.end(g)] == ord(b'\n') else 1) for k,(m,g) in selectors.items()]
     text=do_edits(text,starts+ends+labels)
     return text
 
@@ -128,7 +140,7 @@ class TextRect:
         self.maxwidth=maxwidth
         self.maxheight=maxheight
 
-    def prompt_select(self,outfile,matcher,labelling='after',mode='display',loops=1,text_mask=id_text_mask):
+    def prompt_select(self,outfile,matcher,labelling='after',mode='display',loops=1,text_mask=id_text_mask,post_proc=id_post_proc):
         # find all word matches
         # generate text where words are surrounded by escape sequences that
         # highlight them and also words are labelled by a character that is
@@ -151,8 +163,8 @@ class TextRect:
                 sys.exit(2)
             if selected_label == 'q':
                 sys.exit(3)
-            m=selectors[selected_label]
-            outfile.write(bytes(m.string[m.start():m.end()]))
+            (m,g)=selectors[selected_label]
+            outfile.write(bytes(post_proc(m.string[m.start(g):m.end(g)])))
             sys.exit(0)
 
 MW=int(os.environ['MW'])
@@ -166,5 +178,5 @@ if MODE == "display":
             TextRect(fda.read(),MW,MH).prompt_select(fdb,WORD_MATCHER,loops=LOOPS)
 if MODE == "select":
     with open(INFILE,'r') as fda:
-        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode='select',loops=LOOPS)
+        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode='select',loops=LOOPS,post_proc=WORD_POST_PROC)
     
