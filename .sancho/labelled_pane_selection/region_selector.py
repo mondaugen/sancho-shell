@@ -59,6 +59,17 @@ if MATCHER_STYLE == "line_no_ln":
     # lines omitting leading line numbers
     WORD_MATCHER={"re":re.compile(b'\n?\s*([^\n]*)'),"group":1}
     TEXT_MASK=text_mask_leading_line_numbers
+# TODO: These ones are still half baked
+# If you have nested () or {}, they will stop at the first matching } which is
+# almost never what you want.
+# They also show the masked text highlighted, but it is not copied (so that's
+# good but confusing)
+if MATCHER_STYLE == "arguments":
+    WORD_MATCHER={"re":re.compile(b'(\(([^)]|\n)*\))'),"group":1}
+    TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == "scope":
+    WORD_MATCHER={"re":re.compile(b'({([^}]|\n)*})'),"group":1}
+    TEXT_MASK=text_mask_leading_line_numbers
     
 
 COMMENT_CONTENTS=re.compile('\S')
