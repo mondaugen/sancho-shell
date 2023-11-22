@@ -5,7 +5,7 @@ do_capture ()
 {
     echo "$LOOPS" >> /tmp/loops
     copy_cursor_line=$(tmux display -pt$TARGET_PANE '#{copy_cursor_line}')
-    if [ -z $copy_cursor_line ]; then
+    if [[ -z $copy_cursor_line ]]; then
         tmux capture-pane -pt$TARGET_PANE > /tmp/a
     else
         # find out where we are in the history

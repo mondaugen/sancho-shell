@@ -25,12 +25,41 @@ def id_post_proc(s):
 def strip_post_proc(s):
     return s.strip()
 
+def text_mask_single_delim(text,delim="'"):
+    pol=1
+    val=0
+    result=[0]*len(text)
+    for i,c in enumerate(text):
+        if c == delim:
+            val += pol
+            pol *= -1
+        result[i]=val
+    return result
+
+def id_text_mask(text):
+    return [0]*len(text)
+
+def text_mask_leading_line_numbers(text):
+    ret = [0]*len(text)
+    matcher=re.compile('\n?([0-9]+)')
+    for m in matcher.finditer(text):
+        sta=m.start(1)
+        sto=m.end(1)
+        ret[sta:sto]=[1 for _ in range(sta,sto)]
+    return ret
+
 #if MATCHER_STYLE == "words"
-WORD_MATCHER = {"re":re.compile(b'\\b[a-zA-Z_]+\\b'),"group":0}
+WORD_MATCHER = {"re":re.compile(b'[a-zA-Z_0-9]+'),"group":0}
 WORD_POST_PROC = id_post_proc
+TEXT_MASK=id_text_mask
 if MATCHER_STYLE == "line":
     WORD_MATCHER={"re":re.compile(b'\n?([^\n]+)'),"group":1}
     #WORD_POST_PROC = strip_post_proc # the group strips it for you
+if MATCHER_STYLE == "line_no_ln":
+    # lines omitting leading line numbers
+    WORD_MATCHER={"re":re.compile(b'\n?\s*([^\n]*)'),"group":1}
+    TEXT_MASK=text_mask_leading_line_numbers
+    
 
 COMMENT_CONTENTS=re.compile('\S')
 
@@ -67,20 +96,6 @@ def padline(s,w,pad=" "):
     padding = pad * max(0,w-l)
     return (stub + padding)[:w] + NEWLINE
 
-def text_mask_single_delim(text,delim="'"):
-    pol=1
-    val=0
-    result=[0]*len(text)
-    for i,c in enumerate(text):
-        if c == delim:
-            val += pol
-            pol *= -1
-        result[i]=val
-    return result
-
-def id_text_mask(text):
-    return [0]*len(text)
-
 def apply_text_mask(text,mask,sub=" "):
     return "".join([sub if m != 0 and t not in string.whitespace else t for t,m in zip(text,mask)])
 
@@ -110,6 +125,8 @@ def label_matches(text,matcher,labels,maxwidth,loops):
     mre=matcher['re']
     mgrp=matcher['group']
     for m in list(mre.finditer(text))[::-1]:
+        if m.start(mgrp) == m.end(mgrp):
+            continue
         loc_in_line=m.end(mgrp) - m.string.rfind(b'\n',0,m.end(mgrp))
         if loc_in_line < maxwidth:
             try:
@@ -175,8 +192,8 @@ OUTFILE=os.environ.get('OUTFILE','/tmp/b')
 if MODE == "display":
     with open(INFILE,'r') as fda:
         with open(OUTFILE,'wb') as fdb:
-            TextRect(fda.read(),MW,MH).prompt_select(fdb,WORD_MATCHER,loops=LOOPS)
+            TextRect(fda.read(),MW,MH).prompt_select(fdb,WORD_MATCHER,loops=LOOPS,text_mask=TEXT_MASK)
 if MODE == "select":
     with open(INFILE,'r') as fda:
-        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode='select',loops=LOOPS,post_proc=WORD_POST_PROC)
+        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode='select',loops=LOOPS,post_proc=WORD_POST_PROC,text_mask=TEXT_MASK)
     
