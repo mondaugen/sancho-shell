@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import string
+import numpy as np
 
 MODE=os.environ.get("MODE","display")
 NEWLINE=os.environ.get("NEWLINE","\n")
@@ -168,6 +169,13 @@ class TextRect:
         self.maxwidth=maxwidth
         self.maxheight=maxheight
 
+    def index_to_row_col(self,i):
+        """
+        Row and column are 0-indexed.
+        """
+        rownum=np.cumsum([1 if c == '\n' else 0 for c in self.text])
+        return (rownum[i],i-np.where(rownum == rownum[i])[0][0]-1)
+
     def prompt_select(self,outfile,matcher,labelling='after',mode='display',loops=1,text_mask=id_text_mask,post_proc=id_post_proc):
         # find all word matches
         # generate text where words are surrounded by escape sequences that
@@ -183,7 +191,7 @@ class TextRect:
         )
         if mode == 'display':
             outfile.write(label_text(bytes(self.text,encoding='utf-8'),selectors))
-        if mode == 'select':
+        if mode in ['select','move_start','move_end']:
             selected_label=sys.stdin.read(1)
             if selected_label == 'n':
                 sys.exit(1)
@@ -192,8 +200,13 @@ class TextRect:
             if selected_label == 'q':
                 sys.exit(3)
             (m,g)=selectors[selected_label]
-            outfile.write(bytes(post_proc(m.string[m.start(g):m.end(g)])))
-            sys.exit(0)
+            if mode == 'select':
+                outfile.write(bytes(post_proc(m.string[m.start(g):m.end(g)])))
+            elif mode == 'move_start':
+                outfile.write(bytes('%d %d' % self.index_to_row_col(m.start(g)),encoding='ascii'))
+            elif mode == 'move_end':
+                outfile.write(bytes('%d %d' % self.index_to_row_col(m.end(g)),encoding='ascii'))
+        sys.exit(0)
 
 MW=int(os.environ['MW'])
 MH=int(os.environ['MH'])
@@ -204,7 +217,7 @@ if MODE == "display":
     with open(INFILE,'r') as fda:
         with open(OUTFILE,'wb') as fdb:
             TextRect(fda.read(),MW,MH).prompt_select(fdb,WORD_MATCHER,loops=LOOPS,text_mask=TEXT_MASK)
-if MODE == "select":
+if MODE in ["select","move_start","move_end"]:
     with open(INFILE,'r') as fda:
-        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode='select',loops=LOOPS,post_proc=WORD_POST_PROC,text_mask=TEXT_MASK)
+        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode=MODE,loops=LOOPS,post_proc=WORD_POST_PROC,text_mask=TEXT_MASK)
     

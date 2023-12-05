@@ -1,6 +1,33 @@
 export MW=$(tput cols) MH=$(tput lines)
 LOOPS=1
+[ -z $FINAL_MODE ] && FINAL_MODE=select
 [ -z $TARGET_PANE ] && TARGET_PANE=11
+
+do_move ()
+{
+    echo -ne '\e['$(( 1 + $(cat /tmp/c|awk '{print $1}') ))';'$(( 1 + $(cat /tmp/c|awk '{print $2}') ))'H' > \
+        $(tmux display-message -pt$TARGET_PANE '#{pane_tty}')
+}
+
+text_op ()
+{
+    case $FINAL_MODE in
+        select)
+            tmux load-buffer /tmp/c && echo
+            ;;
+        move_start)
+            do_move
+            ;;
+        move_end)
+            do_move
+            ;;
+        *)
+            echo "Bad mode $FINAL_MODE" >&2
+            exit -1
+            ;;
+    esac
+}
+
 do_capture ()
 {
     echo "$LOOPS" >> /tmp/loops
@@ -24,15 +51,19 @@ do_capture ()
         fi
         sleep 0.1
     done
-    cat /tmp/d | MODE=select python3 .sancho/labelled_pane_selection/region_selector.py > /tmp/c
+    cat /tmp/d | MODE=$FINAL_MODE python3 .sancho/labelled_pane_selection/region_selector.py 2>/tmp/final_selector_error > /tmp/c
     case $? in
         0)
-            tmux load-buffer /tmp/c && echo
+            text_op && echo
             ;;
         1)
+            echo "got error $?"
+            cat /tmp/d
             LOOPS=$(( $LOOPS + 1 )) do_capture
             ;;
         2)
+            echo "got error $?"
+            cat /tmp/d
             LOOPS=$(( $LOOPS - 1 )) do_capture
             ;;
         *)
