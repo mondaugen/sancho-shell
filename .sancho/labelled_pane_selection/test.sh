@@ -5,8 +5,20 @@ LOOPS=1
 
 do_move ()
 {
-    echo -ne '\e['$(( 1 + $(cat /tmp/c|awk '{print $1}') ))';'$(( 1 + $(cat /tmp/c|awk '{print $2}') ))'H' > \
-        $(tmux display-message -pt$TARGET_PANE '#{pane_tty}')
+    current_cmd=$(tmux display-message -pt$TARGET_PANE '#{pane_current_command}')
+    echo -n "$current_cmd" > /tmp/curcmd
+    case $current_cmd in
+        vim)
+            c_s=$(tmux display -pt$TARGET_PANE '#{cursor_x}')
+            l_s=$(tmux display -pt$TARGET_PANE '#{cursor_y}')
+            l_s_p=$(cat /tmp/c|awk '{print $1}')
+            c_s_p=$(cat /tmp/c|awk '{print $2}')
+            tmux send-keys -t$TARGET_PANE Escape :call Space MovTextAbs\($c_s,$l_s,$c_s_p,$l_s_p\) Enter
+            ;;
+        *)
+            echo -ne '\e['$(( 1 + $(cat /tmp/c|awk '{print $1}') ))';'$(( 1 + $(cat /tmp/c|awk '{print $2}') ))'H' > \
+                $(tmux display-message -pt$TARGET_PANE '#{pane_tty}')
+    esac
 }
 
 text_op ()
