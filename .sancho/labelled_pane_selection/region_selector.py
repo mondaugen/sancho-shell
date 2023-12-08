@@ -183,7 +183,7 @@ class TextRect:
         )
         if mode == 'display':
             outfile.write(label_text(bytes(self.text,encoding='utf-8'),selectors))
-        if mode == 'select':
+        if mode == 'select' or mode == 'move':
             selected_label=sys.stdin.read(1)
             if selected_label == 'n':
                 sys.exit(1)
@@ -191,8 +191,11 @@ class TextRect:
                 sys.exit(2)
             if selected_label == 'q':
                 sys.exit(3)
-            (m,g)=selectors[selected_label]
-            outfile.write(bytes(post_proc(m.string[m.start(g):m.end(g)])))
+                (m,g)=selectors[selected_label]
+            if mode == 'select':
+                outfile.write(bytes(post_proc(m.string[m.start(g):m.end(g)])))
+            else:
+                outfile.write(b'%d %d' % (m.start(g),m.end(g)))
             sys.exit(0)
 
 MW=int(os.environ['MW'])

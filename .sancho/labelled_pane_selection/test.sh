@@ -1,4 +1,14 @@
+lookup () 
+{
+    # create selector string
+    s=$(seq -s' ' 0 $(($1 + 1)))
+    s="${s/$1/x}"
+    s="${s//[[:digit:]]/_}"
+    while read $s; do echo -n "$x"; done
+}
+
 export MW=$(tput cols) MH=$(tput lines)
+[ -z $ACTION ] && ACTION=select
 LOOPS=1
 [ -z $TARGET_PANE ] && TARGET_PANE=11
 do_capture ()
@@ -24,10 +34,19 @@ do_capture ()
         fi
         sleep 0.1
     done
-    cat /tmp/d | MODE=select python3 .sancho/labelled_pane_selection/region_selector.py > /tmp/c
+    cat /tmp/d | MODE="$ACTION" python3 .sancho/labelled_pane_selection/region_selector.py > /tmp/c
     case $? in
         0)
-            tmux load-buffer /tmp/c && echo
+            if [[ "$ACTION" == select ]]; then
+                tmux load-buffer /tmp/c && echo
+            else
+                # save where we are now
+                cur_row=$(tmux display '#{cursor_y}')
+                cur_col=$(tmux display '#{cursor_x}')
+                # find out where we need to go
+                new_row=$(cat /tmp/c | lookup 0)
+                new_col=$(cat /tmp/c | lookup 1)
+            fi
             ;;
         1)
             LOOPS=$(( $LOOPS + 1 )) do_capture
