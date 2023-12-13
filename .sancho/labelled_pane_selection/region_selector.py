@@ -142,13 +142,15 @@ def label_matches(text,matcher,labels,maxwidth,loops):
         loc_in_line=m.end(mgrp) - m.string.rfind(b'\n',0,m.end(mgrp))
         if loc_in_line < maxwidth:
             try:
-                selectors[next(iter_labels)]=(m,mgrp)
+                label=next(iter_labels)
             except StopIteration:
                 loops -= 1
                 if loops > 0:
                     iter_labels=iter(labels)
+                    label=next(iter_labels)
                 else:
                     break
+            selectors[label]=(m,mgrp)
     return selectors
 
 def label_text(text,selectors):

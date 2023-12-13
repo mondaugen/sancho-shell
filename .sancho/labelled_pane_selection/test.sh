@@ -1,4 +1,6 @@
-export MW=$(tput cols) MH=$(tput lines)
+[ -z $MW ] && MW=$(tput cols)
+[ -z $MH ] && MH=$(tput lines)
+export MW MH
 LOOPS=1
 [ -z $FINAL_MODE ] && FINAL_MODE=select
 [ -z $TARGET_PANE ] && TARGET_PANE=11
