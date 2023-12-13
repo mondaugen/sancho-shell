@@ -3,6 +3,15 @@ LOOPS=1
 [ -z $FINAL_MODE ] && FINAL_MODE=select
 [ -z $TARGET_PANE ] && TARGET_PANE=11
 
+_max ()
+{
+    if [[ "$1" -lt "$2" ]]; then
+        echo -n "$2"
+    else
+        echo -n "$1"
+    fi
+}
+
 do_move ()
 {
     current_cmd=$(tmux display-message -pt$TARGET_PANE '#{pane_current_command}')
@@ -76,7 +85,7 @@ do_capture ()
         2)
             echo "got error $?"
             cat /tmp/labelled_pane_selection_d
-            LOOPS=$(( $LOOPS - 1 )) do_capture
+            LOOPS=$(_max "$(( $LOOPS - 1 ))" 1) do_capture
             ;;
         *)
             echo "got error $?" && exit $? # don't store any string
