@@ -42,7 +42,7 @@ def id_text_mask(text):
 
 def text_mask_leading_line_numbers(text):
     ret = [0]*len(text)
-    matcher=re.compile('\n?([0-9]+)')
+    matcher=re.compile('\n?\s*([0-9]+)')
     for m in matcher.finditer(text):
         sta=m.start(1)
         sto=m.end(1)
