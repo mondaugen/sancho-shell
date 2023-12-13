@@ -20,6 +20,8 @@ do_move ()
     echo -n "$current_cmd" > /tmp/curcmd
     case $current_cmd in
         vim)
+            # NOTE: Doesn't work if vim is displaying a text file with lines so long that they get broken
+            # also doesn't work with vim windows (split vim windows)
             c_s=$(tmux display -pt$TARGET_PANE '#{cursor_x}')
             l_s=$(tmux display -pt$TARGET_PANE '#{cursor_y}')
             l_s_p=$(cat /tmp/labelled_pane_selection_c|awk '{print $1}')
