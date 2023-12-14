@@ -5,6 +5,11 @@ LOOPS=1
 [ -z $FINAL_MODE ] && FINAL_MODE=select
 [ -z $TARGET_PANE ] && TARGET_PANE=11
 
+# if we are in copy mode, move the cursor to the top of the screen before proceding
+if [[ $(tmux display -pt$TARGET_PANE '#{pane_mode}') == copy-mode ]]; then
+    tmux send-keys -t$TARGET_PANE H
+fi
+
 _max ()
 {
     if [[ "$1" -lt "$2" ]]; then

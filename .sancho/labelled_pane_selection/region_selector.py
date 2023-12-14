@@ -60,6 +60,13 @@ if MATCHER_STYLE == "line_no_ln":
     # lines omitting leading line numbers
     WORD_MATCHER={"re":re.compile(b'\n?\s*([^\n]*)'),"group":1}
     TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == "path":
+    WORD_MATCHER = {"re":re.compile(b'[-~a-zA-Z_0-9/.]+'),"group":0}
+if MATCHER_STYLE == "error_path":
+    # This is a format you see when grep shows the path and line number or a
+    # compiler says the path, line number and character
+    WORD_MATCHER = {"re":re.compile(b'[-~a-zA-Z_0-9/.]+(:[0-9]+)+:'),"group":0}
+    
 # TODO: These ones are still half baked
 # If you have nested () or {}, they will stop at the first matching } which is
 # almost never what you want.
