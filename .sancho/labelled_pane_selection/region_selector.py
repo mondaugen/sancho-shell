@@ -42,17 +42,28 @@ def id_text_mask(text):
 
 def text_mask_leading_line_numbers(text):
     ret = [0]*len(text)
-    matcher=re.compile('\n?\s*([0-9]+)')
+    matcher=re.compile('\n\s*([0-9]+)')
     for m in matcher.finditer(text):
         sta=m.start(1)
         sto=m.end(1)
         ret[sta:sto]=[1 for _ in range(sta,sto)]
     return ret
 
+def text_mask_outside_parens(text):
+    ret = [1]*len(text)
+    pat=re.compile('\([^)]*\)')
+    for m in pat.finditer(text):
+        sta=m.start(0)
+        sto=m.end(0)
+        ret[sta:sto]=[0 for _ in range(sta,sto)]
+    return ret
+
 #if MATCHER_STYLE == "words"
 WORD_MATCHER = {"re":re.compile(b'[a-zA-Z_0-9]+'),"group":0}
 WORD_POST_PROC = id_post_proc
 TEXT_MASK=id_text_mask
+if MATCHER_STYLE == "word_no_ln":
+    TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == "line":
     WORD_MATCHER={"re":re.compile(b'\n?([^\n]+)'),"group":1}
     #WORD_POST_PROC = strip_post_proc # the group strips it for you
@@ -66,6 +77,9 @@ if MATCHER_STYLE == "error_path":
     # This is a format you see when grep shows the path and line number or a
     # compiler says the path, line number and character
     WORD_MATCHER = {"re":re.compile(b'[-~a-zA-Z_0-9/.]+(:[0-9]+)+:'),"group":0}
+if MATCHER_STYLE == 'git_branches':
+    WORD_MATCHER = {"re":re.compile(b'[-~a-zA-Z_0-9/.]+'),"group":0}
+    TEXT_MASK=text_mask_outside_parens
     
 # TODO: These ones are still half baked
 # If you have nested () or {}, they will stop at the first matching } which is
