@@ -65,6 +65,10 @@ grpc ()
 {
     grep --color=always -rnI "$GRP_EXCLUDE" "$@" | less -R
 }
+# grep only over .c and .h files
+alias grpch='grp --include="*.c" --include="*.h"'
+# grep over .c, .h, .cc, .cpp, .hh, .hpp files
+alias grpcpp='grpch --include="*.cc" --include="*.cpp" --include="*.hh" --include="*.hpp"'
 
 # virtualenv that includes the basename of the current directory in the prompt
 alias virtualenv='virtualenv --prompt '\''(`basename $PWD`/`basename "$VIRTUAL_ENV"`)'\'''

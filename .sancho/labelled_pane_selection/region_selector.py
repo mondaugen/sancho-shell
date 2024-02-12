@@ -80,6 +80,8 @@ if MATCHER_STYLE == "error_path":
 if MATCHER_STYLE == 'git_branches':
     WORD_MATCHER = {"re":re.compile(b'[-~a-zA-Z_0-9/.]+'),"group":0}
     TEXT_MASK=text_mask_outside_parens
+if MATCHER_STYLE == 'hash':
+    WORD_MATCHER = {"re":re.compile(b'\\b[a-fA-F0-9]+\\b'),"group":0}
     
 # TODO: These ones are still half baked
 # If you have nested () or {}, they will stop at the first matching } which is
