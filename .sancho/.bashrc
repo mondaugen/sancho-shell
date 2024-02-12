@@ -218,3 +218,8 @@ interleave_debug ()
 if [[ -n "$ON_UBUNTU" ]]; then
     alias f='nautilus'
 fi
+
+fnd ()
+{
+    find -name "*$1*$2"
+}
