@@ -10,6 +10,22 @@ MATCHER_STYLE=os.environ.get("MATCHER_STYLE","word")
 SELECTION_CHARS="0123456789abcdefghijklmorstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 LOOPS=int(os.environ.get("LOOPS","1"))
 
+def matches_by_uniqueness(mre,mgrp,text):
+    """
+    Look for matches described by mre in text.
+    Count the number of times each match occurs. The most unique matches will be presented first.
+    In case there are ties, the longer unique matches will be presented first.
+    """
+    matches_by_string=dict()
+    for m in mre.finditer(text):
+        s=m.string[m.start(mgrp):m.end(mgrp)]
+        if s in matches_by_string:
+            matches_by_string[s].append(m)
+        else:
+            matches_by_string[s]=[m]
+    for s in sorted(matches_by_string.keys(),key=lambda s_: (len(matches_by_string[s_]),-1*len(s_))):
+        yield matches_by_string[s][0]
+
 class RevComment:
     def __init__(self,pat='"""(.|\n)*?"""|""".(.|\n)*?$'):
         self.pat=re.compile(pat)
@@ -159,7 +175,8 @@ def label_matches(text,matcher,labels,maxwidth,loops):
     iter_labels=iter(labels)
     mre=matcher['re']
     mgrp=matcher['group']
-    for m in list(mre.finditer(text))[::-1]:
+#    for m in list(mre.finditer(text))[::-1]:
+    for m in list(matches_by_uniqueness(mre,mgrp,text)):
         if m.start(mgrp) == m.end(mgrp):
             continue
         loc_in_line=m.end(mgrp) - m.string.rfind(b'\n',0,m.end(mgrp))
