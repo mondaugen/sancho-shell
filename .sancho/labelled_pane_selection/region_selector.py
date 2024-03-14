@@ -24,7 +24,8 @@ def matches_by_uniqueness(mre,mgrp,text):
         else:
             matches_by_string[s]=[m]
     for s in sorted(matches_by_string.keys(),key=lambda s_: (len(matches_by_string[s_]),-1*len(s_))):
-        yield matches_by_string[s][0]
+        # return the last one because it will be lowest in the display
+        yield matches_by_string[s][-1]
 
 class RevComment:
     def __init__(self,pat='"""(.|\n)*?"""|""".(.|\n)*?$'):
