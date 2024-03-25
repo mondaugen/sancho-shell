@@ -76,6 +76,7 @@ def text_mask_outside_parens(text):
     return ret
 
 #if MATCHER_STYLE == "words"
+PATH_RE=b'[-~a-zA-Z_0-9/.]+'
 WORD_MATCHER = {"re":re.compile(b'[a-zA-Z_0-9]+'),"group":0}
 WORD_POST_PROC = id_post_proc
 TEXT_MASK=id_text_mask
@@ -89,7 +90,7 @@ if MATCHER_STYLE == "line_no_ln":
     WORD_MATCHER={"re":re.compile(b'\n?\s*([^\n]*)'),"group":1}
     TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == "path":
-    WORD_MATCHER = {"re":re.compile(b'[-~a-zA-Z_0-9/.]+'),"group":0}
+    WORD_MATCHER = {"re":re.compile(PATH_RE),"group":0}
 if MATCHER_STYLE == "error_path":
     # This is a format you see when grep shows the path and line number or a
     # compiler says the path, line number and character
@@ -99,6 +100,11 @@ if MATCHER_STYLE == 'git_branches':
     TEXT_MASK=text_mask_outside_parens
 if MATCHER_STYLE == 'hash':
     WORD_MATCHER = {"re":re.compile(b'\\b[a-fA-F0-9]+\\b'),"group":0}
+if MATCHER_STYLE == 'git_diff':
+    # you see these paths when git shows you a diff: the paths to the two
+    # compared files start with a/ and b/ respectively
+    # we usually just want to copy the path after the a/ or b/
+    WORD_MATCHER = {"re":re.compile(b'\\b[ab]/('+PATH_RE+b')'),"group":1}
     
 # TODO: These ones are still half baked
 # If you have nested () or {}, they will stop at the first matching } which is
