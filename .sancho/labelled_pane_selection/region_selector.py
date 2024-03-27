@@ -3,6 +3,7 @@ import os
 import re
 import string
 import numpy as np
+import functools
 
 MODE=os.environ.get("MODE","display")
 NEWLINE=os.environ.get("NEWLINE","\n")
@@ -24,8 +25,8 @@ def matches_by_uniqueness(mre,mgrp,text):
         else:
             matches_by_string[s]=[m]
     for s in sorted(matches_by_string.keys(),key=lambda s_: (len(matches_by_string[s_]),-1*len(s_))):
-        # return the last one because it will be lowest in the display
-        yield matches_by_string[s][-1]
+        # return all the matches
+        yield matches_by_string[s]
 
 class RevComment:
     def __init__(self,pat='"""(.|\n)*?"""|""".(.|\n)*?$'):
@@ -178,16 +179,21 @@ def label_matches(text,matcher,labels,maxwidth,loops):
     # label locations from the second loop
     # this allows you to label chunks of text where there would be more matches
     # than labels, by discarding earlier chunks
+    # This returns a dictionary whose keys are the selector labels (single
+    # characters that can be typed to select the region) and whose items are
+    # lists of matches indicating where the string is
     selectors=dict()
     iter_labels=iter(labels)
     mre=matcher['re']
     mgrp=matcher['group']
-#    for m in list(mre.finditer(text))[::-1]:
-    for m in list(matches_by_uniqueness(mre,mgrp,text)):
-        if m.start(mgrp) == m.end(mgrp):
-            continue
-        loc_in_line=m.end(mgrp) - m.string.rfind(b'\n',0,m.end(mgrp))
-        if loc_in_line < maxwidth:
+    for ms in list(matches_by_uniqueness(mre,mgrp,text)):
+        # m is a list of matches (if the match yields the same string multiple
+        # times, all these matches are returned)
+        # Filter out matches that have 0 length or we can't render properly
+        ms=filter(lambda m_: not (m_.start(mgrp) == m_.end(mgrp)),ms)
+        ms=filter(lambda m_: (m_.end(mgrp) - m_.string.rfind(b'\n',0,m_.end(mgrp))) < maxwidth,ms)
+        ms=list(ms)
+        if len(ms) > 0:
             try:
                 label=next(iter_labels)
             except StopIteration:
@@ -197,14 +203,21 @@ def label_matches(text,matcher,labels,maxwidth,loops):
                     label=next(iter_labels)
                 else:
                     break
-            selectors[label]=(m,mgrp)
+            selectors[label]=(ms,mgrp)
     return selectors
 
+def _flatten(l):
+    return functools.reduce(lambda a,b:a+b,l)
+
 def label_text(text,selectors):
-    starts=[Edit(m.start(g),ESCAPES.GREEN) for _,(m,g) in selectors.items()]
-    ends=[Edit(m.end(g),ESCAPES.RESET) for _,(m,g) in selectors.items()]
-    labels=[Edit(m.end(g),ESCAPES.WHITE_BOLD+bytes(k,encoding='utf-8')+ESCAPES.RESET,
-            skip=0 if m.string[m.end(g)] == ord(b'\n') else 1) for k,(m,g) in selectors.items()]
+    starts=[[Edit(m.start(g),ESCAPES.GREEN) for m in ms] for _,(ms,g) in selectors.items()]
+    ends=[[Edit(m.end(g),ESCAPES.RESET) for m in ms] for _,(ms,g) in selectors.items()]
+    labels=[[Edit(m.end(g),ESCAPES.WHITE_BOLD+bytes(k,encoding='utf-8')+ESCAPES.RESET,
+            skip=0 if m.string[m.end(g)] == ord(b'\n') else 1) for m in ms] for k,(ms,g) in selectors.items()]
+    # flatten them
+    starts=_flatten(starts)
+    ends=_flatten(ends)
+    labels=_flatten(labels)
     text=do_edits(text,starts+ends+labels)
     return text
 
@@ -248,10 +261,15 @@ class TextRect:
                 sys.exit(2)
             if selected_label == 'q':
                 sys.exit(3)
-            (m,g)=selectors[selected_label]
+            (ms,g)=selectors[selected_label]
+            # Just use the last match (could be the first, it doesn't matter, we just want the string)
+            m=ms[-1]
             if mode == 'select':
                 outfile.write(bytes(post_proc(m.string[m.start(g):m.end(g)])))
             elif mode == 'move_start':
+                # TODO: how to move to a specific one in a group?
+                # Probably "move" should give a unique label to each selection
+                # even if they don't share the same string
                 outfile.write(bytes('%d %d' % self.index_to_row_col(m.start(g)),encoding='ascii'))
             elif mode == 'move_end':
                 outfile.write(bytes('%d %d' % self.index_to_row_col(m.end(g)),encoding='ascii'))
