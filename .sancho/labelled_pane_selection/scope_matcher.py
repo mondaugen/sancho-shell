@@ -20,16 +20,32 @@ def scopes_at_depth(scope_depths,d=1,):
     for sta,sto in zip(np.where(scopes_diff>0)[0],np.where(scopes_diff<0)[0]):
         yield (sta,sto+1)
 
-s='   {{}} {} {  } {{ } } '
-t='   {{}} {} {  } {{ } { '
-u=' { {{}} {} {  } {{ } } '
+if __name__ == "__main__":
+    import os
+    import sys
 
-for ss in [s,t,u]:
-    print(ss)
-    for dd in [1,2]:
-        scope_depths=all_scope_depths(ss)
-        print("depth:",dd)
-        print("".join(['%u' % (i,) for i in scope_depths]))
-        for sta,sto in scopes_at_depth(scope_depths,d=dd):
-            print("".join([ss[:sta]]+["x" for _ in range(sta,sto)]+[ss[sto:]]))
-    print()
+    MODE=os.environ.get("MODE","rm")
+
+    if MODE == "rm":
+        
+        # read file from standard input
+        s=sys.stdin.read()
+        r=list(s)
+        for sta,sto in scopes_at_depth(all_scope_depths(s),1):
+            r[sta:sto]=' '*(sto-sta)
+        print("".join(r))
+    
+    if MODE == "test":
+        s='   {{}} {} {  } {{ } } '
+        t='   {{}} {} {  } {{ } { '
+        u=' { {{}} {} {  } {{ } } '
+
+        for ss in [s,t,u]:
+            print(ss)
+            for dd in [1,2]:
+                scope_depths=all_scope_depths(ss)
+                print("depth:",dd)
+                print("".join(['%u' % (i,) for i in scope_depths]))
+                for sta,sto in scopes_at_depth(scope_depths,d=dd):
+                    print("".join([ss[:sta]]+["x" for _ in range(sta,sto)]+[ss[sto:]]))
+            print()
