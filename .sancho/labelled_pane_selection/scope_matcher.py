@@ -28,12 +28,24 @@ if __name__ == "__main__":
 
     if MODE == "rm":
         
+        import re
+
+        left_comment_converter=re.compile(r'/\*',re.MULTILINE)
+        right_comment_converter=re.compile(r'\*/',re.MULTILINE)
+        newline_shrinker=re.compile(r'\n([^\n])',re.MULTILINE)
+        whitespace_shrinker=re.compile(r'[ \t]+',re.MULTILINE)
+        
         # read file from standard input
-        s=sys.stdin.read()
+        s=right_comment_converter.sub('}}',left_comment_converter.sub('{{',sys.stdin.read()))
         r=list(s)
         for sta,sto in scopes_at_depth(all_scope_depths(s),1):
-            r[sta:sto]=' '*(sto-sta)
-        print("".join(r))
+            r[sta:sto]=[None for _ in range(sto-sta)]
+        s2="".join(filter(lambda x: x is not None,r))
+        s3=whitespace_shrinker.sub(' ',newline_shrinker.sub(r' \1', s2))
+        for l in s3.split('\n'):
+            ls=l.strip()
+            if len(l)>0:
+                print(l.strip())
     
     if MODE == "test":
         s='   {{}} {} {  } {{ } } '
