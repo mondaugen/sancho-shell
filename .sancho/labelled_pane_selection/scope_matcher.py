@@ -1,4 +1,20 @@
 import numpy as np
+from itertools import chain
+
+class scope_view:
+    """
+    This is designed to mimic the re.match object functions so it can be used interchangably
+    """
+    def __init__(self,_start,_end,_string):
+        self._start=_start
+        self._end=_end
+        self.string=_string
+    def start(self,grp):
+        # TODO: Just ignores grp for now
+        return self._start
+    def end(self,grp):
+        # TODO: Just ignores grp for now
+        return self._end
 
 def all_scope_depths(text,delims='{}'):
     scope_boundaries=np.zeros(len(text))
@@ -8,7 +24,7 @@ def all_scope_depths(text,delims='{}'):
     scope_depths=np.cumsum(scope_boundaries)
     return scope_depths
 
-def scopes_at_depth(scope_depths,d=1,):
+def scopes_at_depth(scope_depths,d=1):
     """
     Yield (start,end) pairs so that text[start:end] gives a substring containing
     a scope delimited by delims at depth d.
@@ -19,6 +35,13 @@ def scopes_at_depth(scope_depths,d=1,):
     scopes_diff=np.diff(scopes)
     for sta,sto in zip(np.where(scopes_diff>0)[0],np.where(scopes_diff<0)[0]):
         yield (sta,sto+1)
+
+class scope_gen:
+    def __init__(self,delims='{}'):
+        self.delims=delims
+    def finditer(self,text):
+        scope_depths=all_scope_depths(text,self.delims)
+        return chain([scopes_at_depth(g,d) for d in range(max(scope_depths))])
 
 if __name__ == "__main__":
     import os
