@@ -83,6 +83,9 @@ WORD_POST_PROC = id_post_proc
 TEXT_MASK=id_text_mask
 if MATCHER_STYLE == "word_no_ln":
     TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == "WORD_no_ln":
+    WORD_MATCHER={"re":re.compile(b'\S+'),"group":0}
+    TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == "line":
     WORD_MATCHER={"re":re.compile(b'\n?([^\n]+)'),"group":1}
     #WORD_POST_PROC = strip_post_proc # the group strips it for you
