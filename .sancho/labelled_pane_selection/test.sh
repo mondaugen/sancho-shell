@@ -43,7 +43,7 @@ text_op ()
 {
     case $FINAL_MODE in
         select)
-            tmux load-buffer /tmp/labelled_pane_selection_c && echo
+            tmux load-buffer /tmp/labelled_pane_selection_c && cat /tmp/labelled_pane_selection_c | xclip -sel clip -i && echo
             ;;
         move_start)
             do_move
