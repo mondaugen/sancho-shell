@@ -113,6 +113,21 @@ if MATCHER_STYLE == 'git_diff':
 if MATCHER_STYLE == 'outside_curly':
     WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'{}',depth=LOOPS),"group":0}
     TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == 'inside_curly':
+    WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'{}',depth=LOOPS,left_offset=1,right_offset=-1),"group":0}
+    TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == 'outside_paren':
+    WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'()',depth=LOOPS),"group":0}
+    TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == 'inside_paren':
+    WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'()',depth=LOOPS,left_offset=1,right_offset=-1),"group":0}
+    TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == 'outside_square':
+    WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'[]',depth=LOOPS),"group":0}
+    TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == 'inside_square':
+    WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'[]',depth=LOOPS,left_offset=1,right_offset=-1),"group":0}
+    TEXT_MASK=text_mask_leading_line_numbers
     
 # TODO: These ones are still half baked
 # If you have nested () or {}, they will stop at the first matching } which is
