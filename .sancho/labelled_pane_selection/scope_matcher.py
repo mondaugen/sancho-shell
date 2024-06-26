@@ -34,14 +34,15 @@ def scopes_at_depth(scope_depths,d=1):
     #print("".join(['%u' % (i,) for i in scopes[1:]]))
     scopes_diff=np.diff(scopes)
     for sta,sto in zip(np.where(scopes_diff>0)[0],np.where(scopes_diff<0)[0]):
-        yield (sta,sto+1)
+        yield (int(sta),int(sto+1))
 
 class scope_gen:
-    def __init__(self,delims='{}'):
+    def __init__(self,delims='{}',depth=1):
         self.delims=delims
+        self.depth=depth
     def finditer(self,text):
-        scope_depths=all_scope_depths(text,self.delims)
-        return chain([scopes_at_depth(g,d) for d in range(max(scope_depths))])
+        return [scope_view(sta,sto,text) for sta,sto in scopes_at_depth(scope_depths,self.depth)]
+        
 
 if __name__ == "__main__":
     import os

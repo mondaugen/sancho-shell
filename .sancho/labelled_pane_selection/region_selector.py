@@ -4,6 +4,7 @@ import re
 import string
 import numpy as np
 import functools
+import scope_matcher
 
 MODE=os.environ.get("MODE","display")
 NEWLINE=os.environ.get("NEWLINE","\n")
@@ -109,6 +110,9 @@ if MATCHER_STYLE == 'git_diff':
     # compared files start with a/ and b/ respectively
     # we usually just want to copy the path after the a/ or b/
     WORD_MATCHER = {"re":re.compile(b'\\b[ab]/('+PATH_RE+b')'),"group":1}
+if MATCHER_STYLE == 'outside_curly':
+    WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'{}',depth=LOOPS),"group":0}
+    TEXT_MASK=text_mask_leading_line_numbers
     
 # TODO: These ones are still half baked
 # If you have nested () or {}, they will stop at the first matching } which is
@@ -210,7 +214,7 @@ def label_matches(text,matcher,labels,maxwidth,loops):
     return selectors
 
 def _flatten(l):
-    return functools.reduce(lambda a,b:a+b,l)
+    return functools.reduce(lambda a,b:a+b,l,[])
 
 def label_text(text,selectors):
     starts=[[Edit(m.start(g),ESCAPES.GREEN) for m in ms] for _,(ms,g) in selectors.items()]
