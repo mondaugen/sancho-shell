@@ -30,13 +30,14 @@ if __name__ == "__main__":
         
         import re
 
+        slash_comment_remover=re.compile(r'//.*$',re.MULTILINE)
         left_comment_converter=re.compile(r'/\*',re.MULTILINE)
         right_comment_converter=re.compile(r'\*/',re.MULTILINE)
         newline_shrinker=re.compile(r'\n([^\n])',re.MULTILINE)
         whitespace_shrinker=re.compile(r'[ \t]+',re.MULTILINE)
         
         # read file from standard input
-        s=right_comment_converter.sub('}}',left_comment_converter.sub('{{',sys.stdin.read()))
+        s=right_comment_converter.sub('}}',left_comment_converter.sub('{{',slash_comment_remover.sub('',sys.stdin.read())))
         r=list(s)
         for sta,sto in scopes_at_depth(all_scope_depths(s),1):
             r[sta:sto]=[None for _ in range(sto-sta)]
