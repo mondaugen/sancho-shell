@@ -227,3 +227,9 @@ fnd ()
 {
     find -name "*$1*$2"
 }
+
+def_file ()
+{
+    # search tags for definition and show the file
+    grp "^$1" tags | awk '{print $2}'
+}
