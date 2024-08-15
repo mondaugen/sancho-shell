@@ -26,6 +26,12 @@ generate_path_matches ()
     git -C $2 grep --exclude-standard --no-index -l -I -n -r -e '.*' | grep "$1" | sed 's|^|'$2'/&|'
 }
 
+# generate unique matches starting with $1
+generate_word_matches ()
+{
+    git grep -Iho "\<$1[0-9a-zA-Z_]\+" .|sort|uniq
+}
+
 get_dirname_under_cursor ()
 {
     word=$(get_word_under_cursor $1 $2)
@@ -42,6 +48,12 @@ complete_path_under_cursor ()
     generate_path_matches $word_basename $word_dirname
 }
 
+complete_word_under_cursor ()
+{
+    word=$(get_word_under_cursor $1 $2)
+    generate_word_matches $word
+}
+
 word_length_under_cursor ()
 {
     python3 -c 'import sys; print(len(sys.argv[1]))' $(get_word_under_cursor $1 $2)
@@ -53,6 +65,11 @@ delete_word_under_cursor ()
     tmux send-keys -N $wlen 
 }
 
+get_empty_string ()
+{
+    echo -n ""
+}
+
 make_tmux_menu ()
 {
     # take a list of files, separated by newlines, on stdin
@@ -60,8 +77,8 @@ make_tmux_menu ()
     cheight=$(tmux display-message -p '#{client_height}')
     cwidth=$(tmux display-message -p '#{client_width}')
     wlen=$(word_length_under_cursor $1 $2)
-    word_dirname=$(get_dirname_under_cursor $1 $2)
-    x=$(complete_path_under_cursor $1 $2 | python3 -c '
+    word_dirname=$($4 $1 $2)
+    x=$($3 $1 $2 | python3 -c '
 import sys
 import string
 # remove q so we can quit the menu, j and k so we can scroll like vim
@@ -69,7 +86,7 @@ keys=string.digits[1:]+string.ascii_letters.replace("q","").replace("Q","").repl
 wlen=int(sys.argv[1])
 cheight=int(sys.argv[2])-2 # - 2 to allow menu border
 cwidth=int(sys.argv[3])-22 # - 2 to allow menu border
-len_word_dirname=int(len(sys.argv[4])) + 1 # To remove joining /
+len_word_dirname=int(len(sys.argv[4])) + 1 if len(sys.argv) == 5 else 0 # To remove joining /
 lines=[l.replace(" ","\ ") for l in sys.stdin.readlines()]
 if len(lines) == 0:
     sys.exit(1)
@@ -83,4 +100,16 @@ print(tmux_cmd)
     eval "$x"
 }
 
-make_tmux_menu $1 $2
+[ -z $MODE ] && MODE=path
+case $MODE in
+    path)
+        make_tmux_menu $1 $2 complete_path_under_cursor get_dirname_under_cursor
+        ;;
+    word)
+        make_tmux_menu $1 $2 complete_word_under_cursor get_empty_string
+        ;;
+    *)
+        echo "ERROR: unknown mode" 1>&2
+        exit 1
+        ;;
+esac
