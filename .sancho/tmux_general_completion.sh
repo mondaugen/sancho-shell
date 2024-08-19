@@ -3,7 +3,15 @@ get_word_under_cursor ()
     tmux capturep -p | python3 -c '
 import sys
 import re
-matcher=re.compile("\S")
+import os
+try:
+    GET_WORD_MODE=os.environ["GET_WORD_MODE"]
+except KeyError:
+    GET_WORD_MODE="nonwhitespace"
+if GET_WORD_MODE=="nonwhitespace":
+    matcher=re.compile("\S")
+elif GET_WORD_MODE=="cvar":
+    matcher=re.compile("[a-zA-Z0-9]+")
 # x, y position read from stdin
 lines = sys.stdin.readlines()
 y=min(int(sys.argv[2]),len(lines)-1)
@@ -106,7 +114,7 @@ case $MODE in
         make_tmux_menu $1 $2 complete_path_under_cursor get_dirname_under_cursor
         ;;
     word)
-        make_tmux_menu $1 $2 complete_word_under_cursor get_empty_string
+        GET_WORD_MODE=cvar make_tmux_menu $1 $2 complete_word_under_cursor get_empty_string
         ;;
     *)
         echo "ERROR: unknown mode" 1>&2
