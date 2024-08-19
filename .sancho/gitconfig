@@ -3,10 +3,11 @@
 	b = branch
 	c = commit
 	s = status
+	l = log
 	cl = clone --recurse-submodules
 	d = diff
 	rs = restore --staged
 	tree = log --graph --all --decorate --oneline
 	difc = diff --color
 	dno = diff --name-only
-    dcs = diff --compact-summary
+	dcs = diff --compact-summary
