@@ -233,3 +233,9 @@ def_file ()
     # search tags for definition and show the file
     grp "^$1" tags | awk '{print $2}'
 }
+
+# list files, most recently modified first
+fndt ()
+{
+    find "$1" -type f -printf '%T@ %p\n' | sort -rn | sed 's/^[^ ]\+ //'
+}
