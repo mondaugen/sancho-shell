@@ -239,3 +239,8 @@ fndt ()
 {
     find "$1" -type f -printf '%T@ %p\n' | sort -rn | sed 's/^[^ ]\+ //'
 }
+
+list_comports ()
+{
+    "${HOME}/.sancho/list_comports.py"
+}
