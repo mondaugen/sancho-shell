@@ -279,7 +279,7 @@ class TextRect:
         )
         if mode == 'display':
             outfile.write(label_text(bytes(self.text,encoding='utf-8'),selectors))
-        if mode in ['select','move_start','move_end']:
+        if mode in ['select','move_start','move_end','insert']:
             selected_label=sys.stdin.read(1)
             if selected_label == 'n':
                 sys.exit(1)
@@ -290,7 +290,7 @@ class TextRect:
             (ms,g)=selectors[selected_label]
             # Just use the last match (could be the first, it doesn't matter, we just want the string)
             m=ms[-1]
-            if mode == 'select':
+            if mode in ['select','insert']:
                 outfile.write(bytes(post_proc(m.string[m.start(g):m.end(g)])))
             elif mode == 'move_start':
                 # TODO: how to move to a specific one in a group?
@@ -310,7 +310,7 @@ if MODE == "display":
     with open(INFILE,'r') as fda:
         with open(OUTFILE,'wb') as fdb:
             TextRect(fda.read(),MW,MH).prompt_select(fdb,WORD_MATCHER,loops=LOOPS,text_mask=TEXT_MASK)
-if MODE in ["select","move_start","move_end"]:
+if MODE in ["select","move_start","move_end","insert"]:
     with open(INFILE,'r') as fda:
         TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode=MODE,loops=LOOPS,post_proc=WORD_POST_PROC,text_mask=TEXT_MASK)
     

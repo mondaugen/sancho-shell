@@ -45,6 +45,9 @@ text_op ()
         select)
             tmux load-buffer /tmp/labelled_pane_selection_c && cat /tmp/labelled_pane_selection_c | xclip -sel clip -i && echo
             ;;
+        insert)
+            tmux load-buffer /tmp/labelled_pane_selection_c && tmux paste-buffer -t$TARGET_PANE
+            ;;
         move_start)
             do_move
             ;;
