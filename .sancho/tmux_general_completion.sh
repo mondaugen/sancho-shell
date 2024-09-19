@@ -11,7 +11,7 @@ except KeyError:
 if GET_WORD_MODE=="nonwhitespace":
     matcher=re.compile("\S")
 elif GET_WORD_MODE=="cvar":
-    matcher=re.compile("[a-zA-Z0-9]+")
+    matcher=re.compile("[a-zA-Z0-9_]+")
 # x, y position read from stdin
 lines = sys.stdin.readlines()
 y=min(int(sys.argv[2]),len(lines)-1)
