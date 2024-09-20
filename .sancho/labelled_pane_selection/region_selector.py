@@ -79,7 +79,6 @@ def text_mask_outside_parens(text):
 
 #if MATCHER_STYLE == "words"
 PATH_RE=b'[-~a-zA-Z_0-9/.]+'
-BASENAME_RE=b'[-~a-zA-Z_0-9.]+'
 WORD_MATCHER = {"re":re.compile(b'[a-zA-Z_0-9]+'),"group":0}
 WORD_POST_PROC = id_post_proc
 TEXT_MASK=id_text_mask
@@ -99,7 +98,7 @@ if MATCHER_STYLE == "path":
     WORD_MATCHER = {"re":re.compile(PATH_RE),"group":0}
 # this is like path but omit "/"
 if MATCHER_STYLE == "basename":
-    WORD_MATCHER = {"re":re.compile(BASENAME_RE),"group":0}
+    WORD_MATCHER =  {"re":re.compile(b'[-~a-zA-Z_0-9/.]*[/]([-~a-zA-Z_0-9.]+)'),"group":1}
 if MATCHER_STYLE == "error_path":
     # This is a format you see when grep shows the path and line number or a
     # compiler says the path, line number and character
