@@ -43,15 +43,32 @@ def scopes_at_depth(scope_depths,d=1):
         yield (int(sta),int(sto+1))
 
 class scope_gen:
-    def __init__(self,delims='{}',depth=1,left_offset=0,right_offset=0):
+    def __init__(self,delims='{}',depth=1,left_offset=0,right_offset=0,pre_re_pat=None,only_yield_if_pre_re_match=True):
+        """
+        only_yield_if_pre_re_match, if True will yield the match if
+        only pre_re_pat matched something. If False it will always yield the match. You
+        would set this to True when you abolutely want to match a non-zero-lengthed string before the delimiter scope.
+        """
         self.delims=delims
         self.depth=depth
         self.left_offset=left_offset
         self.right_offset=right_offset
+        self.pre_re_pat=pre_re_pat
+        self.only_yield_if_pre_re_match=only_yield_if_pre_re_match
     def finditer(self,text):
         scope_depths=all_scope_depths(text,self.delims)
-        return [scope_view(sta+self.left_offset,sto+self.right_offset,text) for sta,sto in scopes_at_depth(scope_depths,self.depth)]
-        
+        for sta,sto in scopes_at_depth(scope_depths,self.depth):
+            if self.pre_re_pat is not None:
+                # extract text ending at sta and reverse it so we can search
+                # along it backwards, starting where the scope starts
+                pre_text=text[:sta][::-1]
+                match=self.pre_re_pat.match(pre_text)
+                if match is not None:
+                    sta -= match.span()[1] # (lambda t: t[1]-t[0])(match.span()) but t[0] will always be 0
+                else:
+                    if self.only_yield_if_pre_re_match:
+                        continue
+            yield scope_view(sta+self.left_offset,sto+self.right_offset,text)
 
 if __name__ == "__main__":
     import os
