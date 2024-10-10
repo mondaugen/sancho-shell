@@ -26,7 +26,7 @@ def all_scope_depths(text,delims='{}'):
         first_delim0=scope_boundaries_x[0]
         scope_boundaries[[i for i,_ in filter(lambda t: t[1] == delims[1],enumerate(text[:first_delim0]))]]=0
         # remove delim[0]s that come after the last delim[1]
-        last_delim1=np.where(scope_boundaries==1)[0][-1]
+        last_delim1=scope_boundaries_x[-1]
         scope_boundaries[[last_delim1+i for i,_ in filter(lambda t: t[1] == delims[1],enumerate(text[last_delim1:]))]]=0
     #print("".join(['%u' % (i,) for i in scope_boundaries]))
     scope_depths=np.cumsum(scope_boundaries)
