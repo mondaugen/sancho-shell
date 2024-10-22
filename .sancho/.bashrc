@@ -212,11 +212,7 @@ common_words ()
 
 interleave_debug ()
 {
-    funfun="debug"
-    if [[ -n "$1" ]]; then
-        funfun="$1"
-    fi
-    awk 'BEGIN{x=0}{printf("echo -ne '"'"'"); printf("'"$funfun"'(\"%d\\\\n\");",x); print($0); printf("'"'"'\n"); x++}' | bash
+    python3 "${HOME}/.sancho/interleave_debug.py" "$@"
 }
 
 if [[ -n "$ON_UBUNTU" ]]; then
