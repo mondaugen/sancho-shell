@@ -11,3 +11,6 @@
 	difc = diff --color
 	dno = diff --name-only
 	dcs = diff --compact-summary
+	lno = log --name-only
+	t = log --graph --all --decorate --oneline
+	tn = log --graph --all --decorate --oneline --name-only
