@@ -58,8 +58,9 @@ remap_capslock ()
 
 # directories that are exluded in custom grep and find
 EXCLUDED_DIRS=(.git venv)
+EXCLUDED_FILES=(tags '*.lst' '*.lss')
 # grep with options i always use
-GRP_EXCLUDE="${EXCLUDED_DIRS[@]/#/--exclude-dir=}"
+GRP_EXCLUDE="${EXCLUDED_DIRS[@]/#/--exclude-dir=} ${EXCLUDED_FILES[@]/#/--exclude=}"
 alias grp='grep -rnI '"$GRP_EXCLUDE"
 grpc ()
 {
