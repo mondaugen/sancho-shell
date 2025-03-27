@@ -2,8 +2,13 @@
 # Copyright (c) Nicholas Esterer 2025
 
 import numpy as np
-from itertools import chain
+from itertools import chain, islice
 import os
+
+def int_or_none(x):
+    if x is None:
+        return None
+    return int(x)
 
 class scope_view:
     """
@@ -108,8 +113,11 @@ if __name__ == "__main__":
 
     if MODE == "print_scopes":
         DEPTH=int(os.environ.get("DEPTH","1"))
+        # start of range of scopes to print
+        START=int_or_none(os.environ.get("START"))
+        END=int_or_none(os.environ.get("END"))
         s=sys.stdin.read()
-        for sta,sto in scopes_at_depth(all_scope_depths(s),DEPTH):
+        for sta,sto in islice(scopes_at_depth(all_scope_depths(s),DEPTH),START,END):
             print(s[sta:sto])
     
     if MODE == "test":
