@@ -1,5 +1,9 @@
+# A tool to get scopes at certain depths
+# Copyright (c) Nicholas Esterer 2025
+
 import numpy as np
 from itertools import chain
+import os
 
 class scope_view:
     """
@@ -101,6 +105,12 @@ if __name__ == "__main__":
             ls=l.strip()
             if len(l)>0:
                 print(l.strip())
+
+    if MODE == "print_scopes":
+        DEPTH=int(os.environ.get("DEPTH","1"))
+        s=sys.stdin.read()
+        for sta,sto in scopes_at_depth(all_scope_depths(s),DEPTH):
+            print(s[sta:sto])
     
     if MODE == "test":
         s='   {{}} {} {  } {{ } } '
