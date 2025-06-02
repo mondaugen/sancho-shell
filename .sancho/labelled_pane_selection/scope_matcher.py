@@ -90,6 +90,10 @@ if __name__ == "__main__":
     MODE=os.environ.get("MODE","rm")
 
     if MODE == "rm":
+        """
+        This mode can be used to print out function declarations, e.g.,
+        MODE=rm python3 scope_matcher.py < /tmp/some_c_file.c
+        """
         
         import re
 

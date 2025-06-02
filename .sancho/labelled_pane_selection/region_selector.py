@@ -99,6 +99,8 @@ if MATCHER_STYLE == "path":
 # this is like path but omit "/"
 if MATCHER_STYLE == "basename":
     WORD_MATCHER =  {"re":re.compile(b'[-~a-zA-Z_0-9/.]*[/]([-~a-zA-Z_0-9.]+)'),"group":1}
+if MATCHER_STYLE == "dirname":
+    WORD_MATCHER =  {"re":re.compile(b'([.][/])?([-~a-zA-Z_0-9/.]*[/])[-~a-zA-Z_0-9.]+'),"group":2}
 if MATCHER_STYLE == "error_path":
     # This is a format you see when grep shows the path and line number or a
     # compiler says the path, line number and character
