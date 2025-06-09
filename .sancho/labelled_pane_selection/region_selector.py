@@ -77,6 +77,20 @@ def text_mask_outside_parens(text):
         ret[sta:sto]=[0 for _ in range(sta,sto)]
     return ret
 
+def funargs_splitter(i,text):
+    for sta,sto in i:
+        s=text[sta:sto]
+        k=1
+        while k:
+            n = s.find(b",")
+            if n<0:
+                yield (sta,sto)
+                k=0
+                continue
+            yield (sta,sta+n)
+            sta += n + 1
+            s=s[n+1:]
+
 #if MATCHER_STYLE == "words"
 PATH_RE=b'[-~a-zA-Z_0-9/.]+'
 WORD_MATCHER = {"re":re.compile(b'[a-zA-Z_0-9]+'),"group":0}
@@ -135,6 +149,12 @@ if MATCHER_STYLE == 'inside_square':
     TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == 'function':
     WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'()',depth=LOOPS,pre_re_pat=re.compile(b'[a-zA-Z0-9_]+')),"group":0}
+    TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == 'funargs':
+    WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'()',depth=LOOPS,left_offset=1,right_offset=-1,splitter=funargs_splitter),"group":0}
+    TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == 'structfields':
+    WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'{}',depth=LOOPS,left_offset=1,right_offset=-1,splitter=funargs_splitter),"group":0}
     TEXT_MASK=text_mask_leading_line_numbers
     
 # TODO: These ones are still half baked

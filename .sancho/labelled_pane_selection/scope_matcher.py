@@ -56,11 +56,14 @@ def scopes_at_depth(scope_depths,d=1):
         yield (int(sta),int(sto+1))
 
 class scope_gen:
-    def __init__(self,delims='{}',depth=1,left_offset=0,right_offset=0,pre_re_pat=None,only_yield_if_pre_re_match=True):
+    def __init__(self,delims='{}',depth=1,left_offset=0,right_offset=0,pre_re_pat=None,only_yield_if_pre_re_match=True,splitter=lambda i,t: i):
         """
         only_yield_if_pre_re_match, if True will yield the match if
         only pre_re_pat matched something. If False it will always yield the match. You
         would set this to True when you abolutely want to match a non-zero-lengthed string before the delimiter scope.
+        splitter allows futher splitting a scope. It accepts an iterator
+        returning (start,stop) pairs and the current test to look up the
+        characters at those locations. By default it returns the full scope.
         """
         self.delims=delims
         self.depth=depth
@@ -68,9 +71,13 @@ class scope_gen:
         self.right_offset=right_offset
         self.pre_re_pat=pre_re_pat
         self.only_yield_if_pre_re_match=only_yield_if_pre_re_match
+        self.splitter=splitter
+    def apply_offsets(self,scopes):
+        for sta,sto in scopes:
+            yield sta+self.left_offset,sto+self.right_offset
     def finditer(self,text):
         scope_depths=all_scope_depths(text,self.delims)
-        for sta,sto in scopes_at_depth(scope_depths,self.depth):
+        for sta,sto in self.splitter(self.apply_offsets(scopes_at_depth(scope_depths,self.depth)),text):
             if self.pre_re_pat is not None:
                 # extract text ending at sta and reverse it so we can search
                 # along it backwards, starting where the scope starts
@@ -81,7 +88,7 @@ class scope_gen:
                 else:
                     if self.only_yield_if_pre_re_match:
                         continue
-            yield scope_view(sta+self.left_offset,sto+self.right_offset,text)
+            yield scope_view(sta,sto,text)
 
 if __name__ == "__main__":
     import os
