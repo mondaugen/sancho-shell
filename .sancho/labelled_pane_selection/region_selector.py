@@ -11,6 +11,14 @@ NEWLINE=os.environ.get("NEWLINE","\n")
 MATCHER_STYLE=os.environ.get("MATCHER_STYLE","word")
 SELECTION_CHARS="0123456789abcdefghijklmorstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 LOOPS=int(os.environ.get("LOOPS","1"))
+LISTING_STYLE=os.environ.get("LISTING_STYLE","unique")
+
+def all_matches(mre,mgrp,text):
+    string_match_pairs=[]
+    for m in mre.finditer(text):
+        string_match_pairs.append((m.string[m.start(mgrp):m.end(mgrp)],m))
+    for _,m in sorted(string_match_pairs):
+        yield m
 
 def matches_by_uniqueness(mre,mgrp,text):
     """
@@ -28,6 +36,11 @@ def matches_by_uniqueness(mre,mgrp,text):
     for s in sorted(matches_by_string.keys(),key=lambda s_: (len(matches_by_string[s_]),-1*len(s_))):
         # return all the matches
         yield matches_by_string[s]
+
+listing_styles={
+    "unique":matches_by_uniqueness,
+    "all":all_matches
+}
 
 class RevComment:
     def __init__(self,pat='"""(.|\n)*?"""|""".(.|\n)*?$'):
@@ -223,7 +236,7 @@ def do_edits(s,edits):
         offset += len(e.text) - e.skip
     return s
 
-def label_matches(text,matcher,labels,maxwidth,loops):
+def label_matches(text,matcher,labels,maxwidth,loops,match_lister=matches_by_uniqueness):
     # if loops is 1 it will iterate through iter_labels once
     # if loops is 2 it will iterate through iter_labels twice, but only keep the
     # label locations from the second loop
@@ -236,7 +249,7 @@ def label_matches(text,matcher,labels,maxwidth,loops):
     iter_labels=iter(labels)
     mre=matcher['re']
     mgrp=matcher['group']
-    for ms in list(matches_by_uniqueness(mre,mgrp,text)):
+    for ms in list(match_lister(mre,mgrp,text)):
         # m is a list of matches (if the match yields the same string multiple
         # times, all these matches are returned)
         # Filter out matches that have 0 length or we can't render properly
@@ -288,7 +301,7 @@ class TextRect:
         rownum=np.cumsum([1 if c == '\n' else 0 for c in self.text])
         return (rownum[i],i-np.where(rownum == rownum[i])[0][0]-1)
 
-    def prompt_select(self,outfile,matcher,labelling='after',mode='display',loops=1,text_mask=id_text_mask,post_proc=id_post_proc):
+    def prompt_select(self,outfile,matcher,labelling='after',mode='display',loops=1,text_mask=id_text_mask,post_proc=id_post_proc,listing_style='unique'):
         # find all word matches
         # generate text where words are surrounded by escape sequences that
         # highlight them and also words are labelled by a character that is
@@ -299,7 +312,8 @@ class TextRect:
             matcher,
             SELECTION_CHARS,
             self.maxwidth,
-            loops
+            loops,
+            match_lister=listing_styles[listing_style]
         )
         if mode == 'display':
             outfile.write(label_text(bytes(self.text,encoding='utf-8'),selectors))
@@ -333,8 +347,8 @@ OUTFILE=os.environ.get('OUTFILE','/tmp/b')
 if MODE == "display":
     with open(INFILE,'r') as fda:
         with open(OUTFILE,'wb') as fdb:
-            TextRect(fda.read(),MW,MH).prompt_select(fdb,WORD_MATCHER,loops=LOOPS,text_mask=TEXT_MASK)
+            TextRect(fda.read(),MW,MH).prompt_select(fdb,WORD_MATCHER,loops=LOOPS,text_mask=TEXT_MASK,listing_style=LISTING_STYLE)
 if MODE in ["select","move_start","move_end","insert"]:
     with open(INFILE,'r') as fda:
-        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode=MODE,loops=LOOPS,post_proc=WORD_POST_PROC,text_mask=TEXT_MASK)
+        TextRect(fda.read(),MW,MH).prompt_select(open(sys.stdout.fileno(),mode='wb'),WORD_MATCHER,mode=MODE,loops=LOOPS,post_proc=WORD_POST_PROC,text_mask=TEXT_MASK,listing_style=LISTING_STYLE)
     
