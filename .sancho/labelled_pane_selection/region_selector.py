@@ -30,7 +30,7 @@ def matches_by_uniqueness(mre,mgrp,text):
         yield matches_by_string[s]
 
 class RevComment:
-    def __init__(self,pat='"""(.|\n)*?"""|""".(.|\n)*?$'):
+    def __init__(self,pat=r'"""(.|\n)*?"""|""".(.|\n)*?$'):
         self.pat=re.compile(pat)
     def sub(self,repl,s):
         ret = self.pat.sub(repl,s[::-1])[::-1]
@@ -61,7 +61,7 @@ def id_text_mask(text):
 
 def text_mask_leading_line_numbers(text):
     ret = [0]*len(text)
-    matcher=re.compile('\n\s*([0-9]+)')
+    matcher=re.compile(r'\n\s*([0-9]+)')
     for m in matcher.finditer(text):
         sta=m.start(1)
         sto=m.end(1)
@@ -70,7 +70,7 @@ def text_mask_leading_line_numbers(text):
 
 def text_mask_outside_parens(text):
     ret = [1]*len(text)
-    pat=re.compile('\([^)]*\)')
+    pat=re.compile(r'\([^)]*\)')
     for m in pat.finditer(text):
         sta=m.start(0)
         sto=m.end(0)
@@ -92,43 +92,43 @@ def funargs_splitter(i,text):
             s=s[n+1:]
 
 #if MATCHER_STYLE == "words"
-PATH_RE=b'[-~a-zA-Z_0-9/.]+'
-WORD_MATCHER = {"re":re.compile(b'[a-zA-Z_0-9]+'),"group":0}
+PATH_RE=rb'[-~a-zA-Z_0-9/.]+'
+WORD_MATCHER = {"re":re.compile(rb'[a-zA-Z_0-9]+'),"group":0}
 WORD_POST_PROC = id_post_proc
 TEXT_MASK=id_text_mask
 if MATCHER_STYLE == "word_no_ln":
     TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == "WORD_no_ln":
-    WORD_MATCHER={"re":re.compile(b'\S+'),"group":0}
+    WORD_MATCHER={"re":re.compile(rb'\S+'),"group":0}
     TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == "line":
-    WORD_MATCHER={"re":re.compile(b'\n?([^\n]+)'),"group":1}
+    WORD_MATCHER={"re":re.compile(rb'\n?([^\n]+)'),"group":1}
     #WORD_POST_PROC = strip_post_proc # the group strips it for you
 if MATCHER_STYLE == "line_no_ln":
     # lines omitting leading line numbers
-    WORD_MATCHER={"re":re.compile(b'\n?\s*([^\n]*)'),"group":1}
+    WORD_MATCHER={"re":re.compile(rb'\n?\s*([^\n]*)'),"group":1}
     TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == "path":
     WORD_MATCHER = {"re":re.compile(PATH_RE),"group":0}
 # this is like path but omit "/"
 if MATCHER_STYLE == "basename":
-    WORD_MATCHER =  {"re":re.compile(b'[-~a-zA-Z_0-9/.]*[/]([-~a-zA-Z_0-9.]+)'),"group":1}
+    WORD_MATCHER =  {"re":re.compile(rb'[-~a-zA-Z_0-9/.]*[/]([-~a-zA-Z_0-9.]+)'),"group":1}
 if MATCHER_STYLE == "dirname":
-    WORD_MATCHER =  {"re":re.compile(b'([.][/])?([-~a-zA-Z_0-9/.]*[/])[-~a-zA-Z_0-9.]+'),"group":2}
+    WORD_MATCHER =  {"re":re.compile(rb'([.][/])?([-~a-zA-Z_0-9/.]*[/])[-~a-zA-Z_0-9.]+'),"group":2}
 if MATCHER_STYLE == "error_path":
     # This is a format you see when grep shows the path and line number or a
     # compiler says the path, line number and character
-    WORD_MATCHER = {"re":re.compile(b'[-~a-zA-Z_0-9/.]+(:[0-9]+)+:'),"group":0}
+    WORD_MATCHER = {"re":re.compile(rb'[-~a-zA-Z_0-9/.]+(:[0-9]+)+:'),"group":0}
 if MATCHER_STYLE == 'git_branches':
-    WORD_MATCHER = {"re":re.compile(b'[-~a-zA-Z_0-9/.]+'),"group":0}
+    WORD_MATCHER = {"re":re.compile(rb'[-~a-zA-Z_0-9/.]+'),"group":0}
     TEXT_MASK=text_mask_outside_parens
 if MATCHER_STYLE == 'hash':
-    WORD_MATCHER = {"re":re.compile(b'\\b[a-fA-F0-9]+\\b'),"group":0}
+    WORD_MATCHER = {"re":re.compile(rb'\b[a-fA-F0-9]+\b'),"group":0}
 if MATCHER_STYLE == 'git_diff':
     # you see these paths when git shows you a diff: the paths to the two
     # compared files start with a/ and b/ respectively
     # we usually just want to copy the path after the a/ or b/
-    WORD_MATCHER = {"re":re.compile(b'\\b[ab]/('+PATH_RE+b')'),"group":1}
+    WORD_MATCHER = {"re":re.compile(rb'\b[ab]/('+PATH_RE+b')'),"group":1}
 if MATCHER_STYLE == 'outside_curly':
     WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'{}',depth=LOOPS),"group":0}
     TEXT_MASK=text_mask_leading_line_numbers
@@ -148,7 +148,7 @@ if MATCHER_STYLE == 'inside_square':
     WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'[]',depth=LOOPS,left_offset=1,right_offset=-1),"group":0}
     TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == 'function':
-    WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'()',depth=LOOPS,pre_re_pat=re.compile(b'[a-zA-Z0-9_]+')),"group":0}
+    WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'()',depth=LOOPS,pre_re_pat=re.compile(rb'[a-zA-Z0-9_]+')),"group":0}
     TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == 'funargs':
     WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'()',depth=LOOPS,left_offset=1,right_offset=-1,splitter=funargs_splitter),"group":0}
@@ -163,14 +163,14 @@ if MATCHER_STYLE == 'structfields':
 # They also show the masked text highlighted, but it is not copied (so that's
 # good but confusing)
 if MATCHER_STYLE == "arguments":
-    WORD_MATCHER={"re":re.compile(b'(\(([^)]|\n)*\))'),"group":1}
+    WORD_MATCHER={"re":re.compile(rb'(\(([^)]|\n)*\))'),"group":1}
     TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == "scope":
-    WORD_MATCHER={"re":re.compile(b'({([^}]|\n)*})'),"group":1}
+    WORD_MATCHER={"re":re.compile(rb'({([^}]|\n)*})'),"group":1}
     TEXT_MASK=text_mask_leading_line_numbers
     
 
-COMMENT_CONTENTS=re.compile('\S')
+COMMENT_CONTENTS=re.compile(r'\S')
 
 ## process string before it is copied to clipboard
 

@@ -74,7 +74,7 @@ do_capture ()
             -E$(( $(tmux display -pt$TARGET_PANE '#{pane_height}') - $hist_line_num - 1 )) -pt$TARGET_PANE > /tmp/labelled_pane_selection_a
     fi 
     rm -f /tmp/labelled_pane_selection_d
-    tmux neww -eLOOPS=$LOOPS -eMW=$MW -eMH=$MH -eMATCHER_STYLE=$MATCHER_STYLE 'tmux set-option -w remain-on-exit off && INFILE=/tmp/labelled_pane_selection_a OUTFILE=/tmp/labelled_pane_selection_b python3 .sancho/labelled_pane_selection/region_selector.py 2>/tmp/region_selector_error && cat /tmp/labelled_pane_selection_b | head -n $(($(tput lines) - 0)) | tail -n $(($(tput lines) - 0))| head --bytes=-1 && read -sn 1 tempy && echo -n "$tempy" > /tmp/labelled_pane_selection_d'
+    tmux neww -eLOOPS=$LOOPS -eMW=$MW -eMH=$MH -eMATCHER_STYLE=$MATCHER_STYLE 'tmux set-option -w remain-on-exit off && INFILE=/tmp/labelled_pane_selection_a OUTFILE=/tmp/labelled_pane_selection_b python3 ~/.sancho/labelled_pane_selection/region_selector.py 2>/tmp/region_selector_error && cat /tmp/labelled_pane_selection_b | head -n $(($(tput lines) - 0)) | tail -n $(($(tput lines) - 0))| head --bytes=-1 && read -sn 1 tempy && echo -n "$tempy" > /tmp/labelled_pane_selection_d'
     # wait for /tmp/labelled_pane_selection_d to show up because it seems tmux neww is asynchronous
     while [ 1 ]
     do
@@ -84,7 +84,7 @@ do_capture ()
         fi
         sleep 0.1
     done
-    cat /tmp/labelled_pane_selection_d | MODE=$FINAL_MODE INFILE=/tmp/labelled_pane_selection_a python3 .sancho/labelled_pane_selection/region_selector.py 2>/tmp/final_selector_error > /tmp/labelled_pane_selection_c
+    cat /tmp/labelled_pane_selection_d | MODE=$FINAL_MODE INFILE=/tmp/labelled_pane_selection_a python3 ~/.sancho/labelled_pane_selection/region_selector.py 2>/tmp/final_selector_error > /tmp/labelled_pane_selection_c
     case $? in
         0)
             text_op && echo
