@@ -4,6 +4,7 @@
 import numpy as np
 from itertools import chain, islice
 import os
+import sys
 
 def int_or_none(x):
     if x is None:
@@ -90,17 +91,7 @@ class scope_gen:
                         continue
             yield scope_view(sta,sto,text)
 
-if __name__ == "__main__":
-    import os
-    import sys
-
-    MODE=os.environ.get("MODE","rm")
-
-    if MODE == "rm":
-        """
-        This mode can be used to print out function declarations, e.g.,
-        MODE=rm python3 scope_matcher.py < /tmp/some_c_file.c
-        """
+def func_defs(text):
         
         import re
 
@@ -110,17 +101,51 @@ if __name__ == "__main__":
         newline_shrinker=re.compile(r'\n([^\n])',re.MULTILINE)
         whitespace_shrinker=re.compile(r'[ \t]+',re.MULTILINE)
         
-        # read file from standard input
-        s=right_comment_converter.sub('}}',left_comment_converter.sub('{{',slash_comment_remover.sub('',sys.stdin.read())))
+        s=right_comment_converter.sub('}}',left_comment_converter.sub('{{',slash_comment_remover.sub('',text)))
+        # convert string to list of characters
         r=list(s)
         for sta,sto in scopes_at_depth(all_scope_depths(s),1):
             r[sta:sto]=[None for _ in range(sto-sta)]
+        # join characters back together again into a list, ommitting ones that are None (because the
         s2="".join(filter(lambda x: x is not None,r))
         s3=whitespace_shrinker.sub(' ',newline_shrinker.sub(r' \1', s2))
         for l in s3.split('\n'):
             ls=l.strip()
             if len(l)>0:
-                print(l.strip())
+                yield l.strip()
+
+def count_newlines(s):
+    # TODO: there's something wrong here and if using this to get the line number it can be slightly off
+    return len(s.split("\n"))
+
+if __name__ == "__main__":
+    import os
+    import sys
+
+    MODE=os.environ.get("MODE","rm")
+
+    if MODE == "allfuncalls":
+
+        #TODO: doesn't work properly
+
+        import re
+
+        funfinder=re.compile(r'('+sys.argv[1]+r'\s*)\(',re.MULTILINE)
+
+        text=sys.stdin.read()
+
+        for m in funfinder.finditer(text):
+            sta,sto=next(scopes_at_depth(all_scope_depths(text[m.end(1):],delims='()')))
+            print(str(count_newlines(text[:m.start(0)]))+":",text[m.start(1):m.end(1)]+text[m.end(1):][sta:sto])
+
+    if MODE == "rm":
+        """
+        This mode can be used to print out function declarations, e.g.,
+        MODE=rm python3 scope_matcher.py < /tmp/some_c_file.c
+        """
+
+        for x in func_defs(sys.stdin.read()):
+            print(x)
 
     if MODE == "print_scopes":
         DEPTH=int(os.environ.get("DEPTH","1"))
