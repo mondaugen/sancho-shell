@@ -156,6 +156,8 @@ if MATCHER_STYLE == 'funargs':
 if MATCHER_STYLE == 'structfields':
     WORD_MATCHER={"re":scope_matcher.scope_gen(delims=b'{}',depth=LOOPS,left_offset=1,right_offset=-1,splitter=funargs_splitter),"group":0}
     TEXT_MASK=text_mask_leading_line_numbers
+if MATCHER_STYLE == 'ctypes':
+    WORD_MATCHER={"re":re.compile(rb'\b(struct|enum|union)\s+[0-9a-zA-Z_]+'),"group":0}
     
 # TODO: These ones are still half baked
 # If you have nested () or {}, they will stop at the first matching } which is
