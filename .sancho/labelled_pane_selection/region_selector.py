@@ -158,6 +158,8 @@ if MATCHER_STYLE == 'structfields':
     TEXT_MASK=text_mask_leading_line_numbers
 if MATCHER_STYLE == 'ctypes':
     WORD_MATCHER={"re":re.compile(rb'\b(struct|enum|union)\s+[0-9a-zA-Z_]+'),"group":0}
+if MATCHER_STYLE == 'notcpunct':
+    WORD_MATCHER={"re":re.compile(rb'[-a-zA-Z0-9.>_]+'),"group":0}
     
 # TODO: These ones are still half baked
 # If you have nested () or {}, they will stop at the first matching } which is
