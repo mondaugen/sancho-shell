@@ -104,7 +104,7 @@ def func_defs(text):
         s=right_comment_converter.sub('}}',left_comment_converter.sub('{{',slash_comment_remover.sub('',text)))
         # convert string to list of characters
         r=list(s)
-        for sta,sto in scopes_at_depth(all_scope_depths(s),1):
+        for sta,sto in scopes_at_depth(all_scope_depths(s,delims=os.environ.get("DELIMS","{}")),1):
             r[sta:sto]=[None for _ in range(sto-sta)]
         # join characters back together again into a list, ommitting ones that are None (because the
         s2="".join(filter(lambda x: x is not None,r))

@@ -160,6 +160,13 @@ if MATCHER_STYLE == 'ctypes':
     WORD_MATCHER={"re":re.compile(rb'\b(struct|enum|union)\s+[0-9a-zA-Z_]+'),"group":0}
 if MATCHER_STYLE == 'notcpunct':
     WORD_MATCHER={"re":re.compile(rb'[-a-zA-Z0-9.>_]+'),"group":0}
+# TODO: This needs thinking about more because the matches aren't overlapping
+# right now that means if you have "a sentence like this" WORDS:2 will match "a
+# sentence" and "like this" but not "sentence like".
+if MATCHER_STYLE.split(":")[0]=="WORDS":
+    n_words=int(MATCHER_STYLE.split(":")[1])
+    WORD_MATCHER={"re":re.compile(rb'\S+'+rb'\s+\S+'*(n_words-1)),"group":0}
+    TEXT_MASK=text_mask_leading_line_numbers
     
 # TODO: These ones are still half baked
 # If you have nested () or {}, they will stop at the first matching } which is
